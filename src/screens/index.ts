@@ -1,2 +1,2 @@
-// Export screens here
-// export * from './HomeScreen';
+export * from './HomeScreen';
+
