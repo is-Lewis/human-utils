@@ -4,7 +4,7 @@
 
 **One app. Countless tools. Zero friction.**
 
-HumanUtils is a multi-platform developer toolkit designed to centralise everyday technical utilities without ads, tracking, or bloat. Fast, clean, and offline-capable — built for web, mobile, and desktop.
+HumanUtils is a multi-platform developer toolkit designed to centralise everyday utilities without ads, tracking, or bloat. Fast, clean, and offline-capable — built for web, mobile, desktop and even your CLI.
 
 ---
 
@@ -21,9 +21,83 @@ Most developer tool websites are slow, cluttered, and riddled with ads. HumanUti
 
 ---
 
-## 🛠️ Planned Tools
+## 🏗️ Architecture
 
-### Phase 1 (Core Utilities)
+```
+/App.tsx            → Application entry point
+/index.ts           → Root index
+/src
+  /components       → Reusable UI components (Container, SearchBar, CategoryCard)
+  /constants        → Static data (tool categories, app config)
+  /navigation       → React Navigation setup (RootNavigator)
+  /screens          → Screen wrappers (HomeScreen, tool screens)
+  /theme            → Design system (colors, typography, spacing, ThemeContext)
+  /tools            → Self-contained tool modules
+    /json-formatter
+      logic.ts      → Pure business logic (platform-agnostic)
+      screen.tsx    → React Native UI wrapper
+      types.ts      → Tool-specific types
+    /uuid-generator
+    /base64-encoder
+    ...
+  /utils            → Shared utilities (used by multiple tools)
+    /formatters     → String, number, date formatting
+    /validators     → Input validation logic
+    /converters     → Base64, color, unit conversions
+    /crypto         → Hashing functions
+    /clipboard      → Copy/paste utilities
+    /storage        → Local storage wrappers
+```
+
+**Design Principles:**
+- Each tool is self-contained with pure logic layer (UI-agnostic)
+- Shared utilities organized by function type for maximum reusability
+- Component-driven architecture with React Navigation
+- Custom theme system with Light/Dark mode support
+- SaaS-inspired layout with max-width containers
+
+---
+
+## 🚀 Tech Stack
+
+- **Framework:** React Native + Expo
+- **Language:** TypeScript
+- **Platforms:** 
+  - Web (Phase 1)
+  - CLI (Phase 1)
+  - Mobile - iOS & Android (planned, later phase)
+  - Desktop (planned, Phase 3)
+- **Tooling:** ESLint, Prettier
+- **Testing:** Vitest + React Testing Library (planned)
+
+---
+
+## 📦 Using HumanUtils
+
+**Initial Release (Phase 1):**
+- **Web:** Visit [humanutils.io](https://humanutils.io) (coming soon)
+- **CLI:** `npm install -g human-utils` (coming soon)
+
+**Future Releases:**
+- **Mobile:** iOS & Android apps (planned for later phase)
+- **Desktop:** Standalone desktop application (Phase 3)
+
+Most tools run entirely client-side in your browser or on your device. Optional features like account sync require authentication but do not track or sell your data.
+
+---
+
+## 🗺️ Development Roadmap
+
+### Phase 0: Foundation ✅
+- [x] Project setup & Expo installation
+- [x] Design system (theme, colors, typography, spacing)
+- [x] Navigation architecture
+- [x] Home screen with tool categories
+
+### Phase 1: Core Utilities (In Progress)
+**Goal:** Build essential developer tools with full platform support
+
+**Tools:**
 - JSON formatter & validator
 - UUID generator
 - Base64 encoder/decoder
@@ -35,7 +109,21 @@ Most developer tool websites are slow, cluttered, and riddled with ads. HumanUti
 - URL encoder/decoder
 - Number + unit converters
 
-### Phase 2 (Advanced Tools)
+**Strategy:**
+- Each tool built with pure logic layer (UI-agnostic)
+- CLI framework established alongside GUI development
+- Core logic shared between all platforms
+- Testing for both GUI and CLI interfaces
+
+**Deliverables:**
+- Web app deployment (humanutils.io)
+- CLI tool with Phase 1 utilities
+- Mobile apps moved to later phase due to distribution costs
+
+### Phase 2: Advanced Tools
+**Goal:** Expand toolkit with more complex utilities
+
+**Tools:**
 - Password generator
 - Diff/compare tool
 - Markdown previewer
@@ -46,74 +134,18 @@ Most developer tool websites are slow, cluttered, and riddled with ads. HumanUti
 - CSV ↔ JSON converter
 - IP/network utilities
 
----
+**Strategy:**
+- Continue CLI-first architecture pattern
+- Add advanced features to existing tools
+- Introduce optional cloud features (sync, history)
 
-## 🏗️ Architecture
-
-```
-/app                → Entry point (React Native + web)
-/src
-  /tools            → Each tool isolated as its own module
-  /common           → Shared logic (validation, formatting, helpers)
-  /ui               → Reusable interface components
-  /theme            → Design tokens, colours, spacing, typography
-```
-
-Each tool is self-contained with:
-- Pure TypeScript logic
-- UI component/screen
-- Typed interfaces
-- Independent tests
-
----
-
-## 🚀 Tech Stack
-
-- **Framework:** React Native + Expo
-- **Language:** TypeScript
-- **Platforms:** Web, iOS, Android, Desktop
-- **Tooling:** ESLint, Prettier
-- **Testing:** Vitest + React Testing Library (planned)
-
----
-
-## 📦 Getting Started
-
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/is-Lewis/human-utils.git
-cd human-utils
-
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-```
-
-### Run on specific platforms
-
-```bash
-npm run web      # Web browser
-npm run android  # Android emulator/device
-npm run ios      # iOS simulator (macOS only)
-```
-
----
-
-## 🗺️ Roadmap
-
-- [x] **Phase 0:** Project setup & Expo installation
-- [ ] **Phase 1:** Foundation (project structure, design system, UI primitives)
-- [ ] **Phase 2:** Core tool set (JSON, UUID, Base64, timestamps, etc.)
-- [ ] **Phase 3:** Platform expansion (web deploy, desktop, mobile builds)
-- [ ] **Phase 4:** Quality & polish (testing, performance, offline support)
+### Phase 3: Polish & Expansion
+- Desktop builds (Electron or similar)
+- Performance optimization
+- Offline support & PWA features
+- Comprehensive testing suite
+- Advanced CLI features (piping, chaining tools)
+- User accounts & sync (optional)
 
 ---
 
@@ -124,19 +156,6 @@ npm run ios      # iOS simulator (macOS only)
 - No unnecessary visual clutter
 - Typography and spacing via design tokens
 - React Native-compatible primitives
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! This project follows a strict modular architecture — each tool should be:
-
-1. Self-contained in `/src/tools/<tool-name>`
-2. Fully typed with TypeScript
-3. Tested independently
-4. UI-agnostic (logic separate from presentation)
-
-More contribution guidelines coming soon.
 
 ---
 

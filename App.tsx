@@ -1,20 +1,29 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { ThemeProvider } from './src/theme';
+import { RootNavigator } from './src/navigation/RootNavigator';
+import { useFonts, ShareTechMono_400Regular } from '@expo-google-fonts/share-tech-mono';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    ShareTechMono_400Regular,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <ThemeProvider>
+      <RootNavigator />
       <StatusBar style="auto" />
-    </View>
+    </ThemeProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
+
