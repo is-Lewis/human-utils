@@ -30,15 +30,22 @@ Most developer tool websites are slow, cluttered, and riddled with ads. HumanUti
   /components       → Reusable UI components (Container, SearchBar, CategoryCard)
   /constants        → Static data (tool categories, app config)
   /navigation       → React Navigation setup (RootNavigator)
-  /screens          → Screen wrappers (HomeScreen, tool screens)
+  /screens          → ALL screens in the app
+    HomeScreen.tsx              → Home/landing screen
+    UuidGeneratorScreen.tsx     → UUID tool screen
+    JsonFormatterScreen.tsx     → JSON tool screen
+    SettingsScreen.tsx          → Settings screen
+    ...
   /theme            → Design system (colors, typography, spacing, ThemeContext)
-  /tools            → Self-contained tool modules
-    /json-formatter
-      logic.ts      → Pure business logic (platform-agnostic)
-      screen.tsx    → React Native UI wrapper
-      types.ts      → Tool-specific types
+  /tools            → Pure logic libraries (platform-agnostic, no UI)
     /uuid-generator
+      index.ts      → generateUUID(), validateUUID(), etc.
+      types.ts      → Tool-specific types
+    /json-formatter
+      index.ts      → formatJSON(), validateJSON(), etc.
+      types.ts
     /base64-encoder
+      index.ts
     ...
   /utils            → Shared utilities (used by multiple tools)
     /formatters     → String, number, date formatting
@@ -50,7 +57,9 @@ Most developer tool websites are slow, cluttered, and riddled with ads. HumanUti
 ```
 
 **Design Principles:**
-- Each tool is self-contained with pure logic layer (UI-agnostic)
+- Tools are pure logic libraries with zero UI dependencies
+- Screens consume tools (screens → tools, never the reverse)
+- All navigation destinations live in `/screens` for consistency
 - Shared utilities organized by function type for maximum reusability
 - Component-driven architecture with React Navigation
 - Custom theme system with Light/Dark mode support
