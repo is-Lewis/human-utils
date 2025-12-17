@@ -3,6 +3,7 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '../theme';
 import { HomeScreen, UuidGeneratorScreen } from '../screens';
+import { CustomHeader } from './CustomHeader';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -18,7 +19,7 @@ export const RootNavigator = () => {
         <NavigationContainer theme={theme === 'dark' ? DarkTheme : DefaultTheme }>
             <Stack.Navigator
                 screenOptions={{
-                    headerShown: false,
+                    header: (props) => <CustomHeader {...props} />,
                 }}
             >
                 <Stack.Screen name="Home" component={HomeScreen} />

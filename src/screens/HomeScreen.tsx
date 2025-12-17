@@ -1,19 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Sun, Moon } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/RootNavigator';
 import { useTheme, typography } from '../theme';
 import { spacing } from '../theme/spacing';
 import { APP_NAME, TOOL_CATEGORIES, TOOLS } from '../constants';
 import { CategoryCard, SearchBar, Container } from '../components';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/RootNavigator';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export const HomeScreen = () => {
-  const { colors, toggleTheme, theme } = useTheme();
+  const { colors } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -43,6 +42,8 @@ export const HomeScreen = () => {
     return [...matchedTools, ...matchedCategories];
   }, [searchQuery, selectedCategory]);
 
+  const isSearching = searchQuery.trim().length > 0;
+
   const handleCategoryPress = (categoryId: string) => {
     setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
   };
@@ -50,8 +51,6 @@ export const HomeScreen = () => {
   const handleToolPress = (route: keyof RootStackParamList) => {
     navigation.navigate(route);
   };
-
-  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
@@ -65,17 +64,6 @@ export const HomeScreen = () => {
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <View style={styles.headerContainer}>
-              {/* Top Bar with Theme Toggle */}
-              <View style={styles.topBar}>
-                <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
-                  {theme === 'light' ? (
-                    <Moon size={24} color={colors.text} />
-                  ) : (
-                    <Sun size={24} color={colors.text} />
-                  )}
-                </TouchableOpacity>
-              </View>
-
               {/* Centered Hero Section */}
               <View style={styles.hero}>
                 <Text style={[styles.logoIcon, { color: colors.primary, fontFamily: typography.code }]}>
@@ -162,11 +150,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginBottom: spacing.xl,
   },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: spacing.s,
-  },
   hero: {
     alignItems: 'center',
     marginBottom: spacing.l,
@@ -185,10 +168,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     opacity: 0.8,
-  },
-  themeButton: {
-    padding: spacing.s,
-    borderRadius: 20,
   },
   searchBar: {
     marginTop: spacing.m,
