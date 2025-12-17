@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, TextInput, StyleSheet, ViewStyle } from 'react-native';
+import { View, TextInput, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
+import { X } from 'lucide-react-native';
 import { useTheme, typography } from '../theme';
 import { spacing } from '../theme/spacing';
 
@@ -17,6 +18,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   style,
 }) => {
   const { colors } = useTheme();
+
+  const handleClear = () => {
+    onChangeText('');
+  };
 
   return (
     <View
@@ -38,6 +43,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         placeholderTextColor={colors.textMuted}
         selectionColor={colors.primary}
       />
+      {value.length > 0 && (
+        <TouchableOpacity
+          onPress={handleClear}
+          style={styles.clearButton}
+          accessibilityLabel="Clear search"
+          accessibilityRole="button"
+        >
+          <X size={20} color={colors.textMuted} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -55,5 +70,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     height: '100%',
+    paddingRight: spacing.s,
+  },
+  clearButton: {
+    padding: spacing.xs,
+    marginLeft: spacing.xs,
   },
 });
+
