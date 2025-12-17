@@ -1,25 +1,46 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Sun, Moon } from 'lucide-react-native';
 import { useTheme, typography } from '../theme';
 import { spacing } from '../theme/spacing';
-import { APP_NAME, TOOL_CATEGORIES } from '../constants';
+import { APP_NAME, TOOL_CATEGORIES, TOOLS } from '../constants';
 import { CategoryCard, SearchBar, Container } from '../components';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/RootNavigator';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export const HomeScreen = () => {
-  const { colors, toggleTheme, theme } = useTheme();
+  const { colors } = useTheme();
+  const navigation = useNavigation<NavigationProp>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const filteredCategories = TOOL_CATEGORIES.filter((cat) =>
     cat.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredTools = TOOLS.filter(tool => {
+    const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          tool.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = !selectedCategory || tool.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const handleCategoryPress = (categoryId: string) => {
+    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
+  };
+
+  const handleToolPress = (route: keyof RootStackParamList) => {
+    navigation.navigate(route);
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Container>
         <FlatList
-          data={filteredCategories}
+          data={selectedCategory ? filteredTools : filteredCategories}
           keyExtractor={(item) => item.id}
           numColumns={2}
           contentContainerStyle={styles.listContent}
@@ -27,17 +48,6 @@ export const HomeScreen = () => {
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <View style={styles.headerContainer}>
-              {/* Top Bar with Theme Toggle */}
-              <View style={styles.topBar}>
-                <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
-                  {theme === 'light' ? (
-                    <Moon size={24} color={colors.text} />
-                  ) : (
-                    <Sun size={24} color={colors.text} />
-                  )}
-                </TouchableOpacity>
-              </View>
-
               {/* Centered Hero Section */}
               <View style={styles.hero}>
                 <Text style={[styles.logoIcon, { color: colors.primary, fontFamily: typography.code }]}>
@@ -55,16 +65,43 @@ export const HomeScreen = () => {
                 placeholder="What do you need to do?"
                 style={styles.searchBar}
               />
+
+              {/* Breadcrumb / Back to Categories */}
+              {selectedCategory && (
+                <TouchableOpacity 
+                  style={styles.backButton}
+                  onPress={() => setSelectedCategory(null)}
+                >
+                  <Text style={[styles.backText, { color: colors.primary }]}>
+                    ← Back to Categories
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           }
-          renderItem={({ item }) => (
-            <CategoryCard
-              title={item.title}
-              icon={item.icon}
-              onPress={() => console.log(`Pressed ${item.id}`)}
-              style={styles.card}
-            />
-          )}
+          renderItem={({ item }) => {
+            if ('route' in item) {
+              // Tool item
+              return (
+                <CategoryCard
+                  title={item.title}
+                  icon={item.icon}
+                  onPress={() => handleToolPress(item.route)}
+                  style={styles.card}
+                />
+              );
+            } else {
+              // Category item
+              return (
+                <CategoryCard
+                  title={item.title}
+                  icon={item.icon}
+                  onPress={() => handleCategoryPress(item.id)}
+                  style={styles.card}
+                />
+              );
+            }
+          }}
         />
       </Container>
     </SafeAreaView>
@@ -80,11 +117,6 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     marginBottom: spacing.xl,
-  },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: spacing.s,
   },
   hero: {
     alignItems: 'center',
@@ -105,12 +137,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.8,
   },
-  themeButton: {
-    padding: spacing.s,
-    borderRadius: 20,
-  },
   searchBar: {
     marginTop: spacing.m,
+  },
+  backButton: {
+    marginTop: spacing.m,
+    paddingVertical: spacing.s,
+  },
+  backText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   row: {
     justifyContent: 'space-between',

@@ -7,7 +7,8 @@ import {
   Code, 
   Globe, 
   Calculator, 
-  Palette 
+  Palette,
+  Hash
 } from 'lucide-react-native';
 
 
@@ -20,4 +21,15 @@ export const TOOL_CATEGORIES = [
     { id: 'network', title: 'Network & Web', icon: Globe },
     { id: 'math', title: 'Math & Numbers', icon: Calculator },
     { id: 'colors', title: 'Colors & Images', icon: Palette },
+];
+
+export const TOOLS = [
+    {
+        id: 'uuid-generator',
+        title: 'UUID Generator',
+        description: 'Generate universally unique identifiers (v1, v4, v5, v7)',
+        category: 'dev',
+        icon: Hash,
+        route: 'UuidGenerator' as const
+    }
 ];

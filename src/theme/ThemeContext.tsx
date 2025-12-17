@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { colors } from './colors';
+import { spacing } from './spacing';
 
 /**
  * Supported theme modes
@@ -26,7 +27,12 @@ export interface ThemeContextType {
     surface: string;
     text: string;
     textMuted: string;
+    card: string;
+    border: string;
+    textSecondary: string;
   };
+  /** Spacing constants for consistent layout */
+  spacing: typeof spacing;
 }
 
 /**
@@ -69,10 +75,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     surface: theme === 'light' ? colors.lightSurface : colors.darkSurface,
     text: theme === 'light' ? colors.textOnLight : colors.textOnDark,
     textMuted: theme === 'light' ? colors.textMutedOnLight : colors.textMutedOnDark,
+    card: theme === 'light' ? colors.lightSurface : colors.darkSurface,
+    border: theme === 'light' ? '#E5E7EB' : '#374151',
+    textSecondary: theme === 'light' ? colors.textMutedOnLight : colors.textMutedOnDark,
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, colors: themeColors }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, colors: themeColors, spacing }}>
       {children}
     </ThemeContext.Provider>
   );
