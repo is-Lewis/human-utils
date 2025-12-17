@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, typography } from '../theme';
@@ -17,16 +17,32 @@ export const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const filteredCategories = TOOL_CATEGORIES.filter((cat) =>
-    cat.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter and combine results based on search query
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) {
+      // No search - show categories or tools in selected category
+      if (selectedCategory) {
+        return TOOLS.filter(tool => tool.category === selectedCategory);
+      }
+      return TOOL_CATEGORIES;
+    }
 
-  const filteredTools = TOOLS.filter(tool => {
-    const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          tool.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || tool.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+    const query = searchQuery.toLowerCase();
+    const matchedTools = TOOLS.filter(tool => 
+      tool.title.toLowerCase().includes(query) ||
+      tool.description.toLowerCase().includes(query) ||
+      TOOL_CATEGORIES.find(cat => cat.id === tool.category)?.title.toLowerCase().includes(query)
+    );
+
+    const matchedCategories = TOOL_CATEGORIES.filter(cat =>
+      cat.title.toLowerCase().includes(query)
+    );
+
+    // Return tools first, then categories
+    return [...matchedTools, ...matchedCategories];
+  }, [searchQuery, selectedCategory]);
+
+  const isSearching = searchQuery.trim().length > 0;
 
   const handleCategoryPress = (categoryId: string) => {
     setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
@@ -40,7 +56,7 @@ export const HomeScreen = () => {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Container>
         <FlatList
-          data={selectedCategory ? filteredTools : filteredCategories}
+          data={searchResults}
           keyExtractor={(item) => item.id}
           numColumns={2}
           contentContainerStyle={styles.listContent}
@@ -62,12 +78,12 @@ export const HomeScreen = () => {
               <SearchBar
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="What do you need to do?"
+                placeholder="Search tools or categories..."
                 style={styles.searchBar}
               />
 
-              {/* Breadcrumb / Back to Categories */}
-              {selectedCategory && (
+              {/* Back to Categories Button */}
+              {(selectedCategory && !isSearching) && (
                 <TouchableOpacity 
                   style={styles.backButton}
                   onPress={() => setSelectedCategory(null)}
@@ -76,6 +92,22 @@ export const HomeScreen = () => {
                     ← Back to Categories
                   </Text>
                 </TouchableOpacity>
+              )}
+
+              {/* Search Results Header */}
+              {isSearching && searchResults.length > 0 && (
+                <Text style={[styles.resultsHeader, { color: colors.textMuted }]}>
+                  Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+                </Text>
+              )}
+
+              {/* No Results Message */}
+              {isSearching && searchResults.length === 0 && (
+                <View style={styles.noResults}>
+                  <Text style={[styles.noResultsText, { color: colors.textMuted }]}>
+                    No tools or categories found for "{searchQuery}"
+                  </Text>
+                </View>
               )}
             </View>
           }
@@ -147,6 +179,19 @@ const styles = StyleSheet.create({
   backText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  resultsHeader: {
+    marginTop: spacing.m,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  noResults: {
+    marginTop: spacing.l,
+    alignItems: 'center',
+  },
+  noResultsText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
   row: {
     justifyContent: 'space-between',
