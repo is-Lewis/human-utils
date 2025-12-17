@@ -1,25 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Sun, Moon } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/RootNavigator';
 import { useTheme, typography } from '../theme';
 import { spacing } from '../theme/spacing';
-import { APP_NAME, TOOL_CATEGORIES } from '../constants';
+import { APP_NAME, TOOL_CATEGORIES, TOOLS } from '../constants';
 import { CategoryCard, SearchBar, Container } from '../components';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export const HomeScreen = () => {
   const { colors, toggleTheme, theme } = useTheme();
+  const navigation = useNavigation<NavigationProp>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const filteredCategories = TOOL_CATEGORIES.filter((cat) =>
-    cat.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter and combine results based on search query
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) {
+      // No search - show categories or tools in selected category
+      if (selectedCategory) {
+        return TOOLS.filter(tool => tool.category === selectedCategory);
+      }
+      return TOOL_CATEGORIES;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const matchedTools = TOOLS.filter(tool => 
+      tool.title.toLowerCase().includes(query) ||
+      tool.description.toLowerCase().includes(query) ||
+      TOOL_CATEGORIES.find(cat => cat.id === tool.category)?.title.toLowerCase().includes(query)
+    );
+
+    const matchedCategories = TOOL_CATEGORIES.filter(cat =>
+      cat.title.toLowerCase().includes(query)
+    );
+
+    // Return tools first, then categories
+    return [...matchedTools, ...matchedCategories];
+  }, [searchQuery, selectedCategory]);
+
+  const handleCategoryPress = (categoryId: string) => {
+    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
+  };
+
+  const handleToolPress = (route: keyof RootStackParamList) => {
+    navigation.navigate(route);
+  };
+
+  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Container>
         <FlatList
-          data={filteredCategories}
+          data={searchResults}
           keyExtractor={(item) => item.id}
           numColumns={2}
           contentContainerStyle={styles.listContent}
@@ -52,19 +90,62 @@ export const HomeScreen = () => {
               <SearchBar
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="What do you need to do?"
+                placeholder="Search tools or categories..."
                 style={styles.searchBar}
               />
+
+              {/* Back to Categories Button */}
+              {(selectedCategory && !isSearching) && (
+                <TouchableOpacity 
+                  style={styles.backButton}
+                  onPress={() => setSelectedCategory(null)}
+                >
+                  <Text style={[styles.backText, { color: colors.primary }]}>
+                    ← Back to Categories
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Search Results Header */}
+              {isSearching && searchResults.length > 0 && (
+                <Text style={[styles.resultsHeader, { color: colors.textMuted }]}>
+                  Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+                </Text>
+              )}
+
+              {/* No Results Message */}
+              {isSearching && searchResults.length === 0 && (
+                <View style={styles.noResults}>
+                  <Text style={[styles.noResultsText, { color: colors.textMuted }]}>
+                    No tools or categories found for "{searchQuery}"
+                  </Text>
+                </View>
+              )}
             </View>
           }
-          renderItem={({ item }) => (
-            <CategoryCard
-              title={item.title}
-              icon={item.icon}
-              onPress={() => console.log(`Pressed ${item.id}`)}
-              style={styles.card}
-            />
-          )}
+          renderItem={({ item }) => {
+            if ('route' in item) {
+              // Tool item
+              return (
+                <CategoryCard
+                  title={item.title}
+                  icon={item.icon}
+                  onPress={() => handleToolPress(item.route)}
+                  style={styles.card}
+                />
+              );
+            } else {
+              // Category item
+              return (
+                <CategoryCard
+                  title={item.title}
+                  icon={item.icon}
+                  onPress={() => handleCategoryPress(item.id)}
+                  style={styles.card}
+                />
+              );
+            }
+          }}
         />
       </Container>
     </SafeAreaView>
@@ -111,6 +192,27 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     marginTop: spacing.m,
+  },
+  backButton: {
+    marginTop: spacing.m,
+    paddingVertical: spacing.s,
+  },
+  backText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  resultsHeader: {
+    marginTop: spacing.m,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  noResults: {
+    marginTop: spacing.l,
+    alignItems: 'center',
+  },
+  noResultsText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
   row: {
     justifyContent: 'space-between',

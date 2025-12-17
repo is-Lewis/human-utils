@@ -2,10 +2,11 @@ import React from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '../theme';
-import { HomeScreen } from '../screens';
+import { HomeScreen, UuidGeneratorScreen } from '../screens';
 
 export type RootStackParamList = {
   Home: undefined;
+  UuidGenerator: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -21,6 +22,7 @@ export const RootNavigator = () => {
                 }}
             >
                 <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="UuidGenerator" component={UuidGeneratorScreen} />
         </Stack.Navigator>
         </NavigationContainer>
     );
