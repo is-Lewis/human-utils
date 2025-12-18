@@ -11,12 +11,12 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
-import { ChevronDown, ChevronRight, Dice5, Database, RefreshCw, Clock } from 'lucide-react-native';
+import { ChevronDown, ChevronRight, Dice5, Database, RefreshCw, Clock, CheckCircle, XCircle } from 'lucide-react-native';
 import { Container, InfoButton, InfoPopup } from '../components';
 import { useTheme } from '../theme';
 import { UUIDVersion, UUID_NAMESPACES } from '../tools/uuid-generator/types';
 import { UUID_VERSION_METADATA, HELP_ME_CHOOSE_GUIDE, UUIDVersionMetadata } from '../tools/uuid-generator/metadata';
-import { generateUUID, generateV5 } from '../tools/uuid-generator';
+import { generateUUID, generateV5, isValidUUID } from '../tools/uuid-generator';
 import * as Clipboard from 'expo-clipboard';
 
 export const UuidGeneratorScreen: React.FC = () => {
@@ -33,6 +33,10 @@ export const UuidGeneratorScreen: React.FC = () => {
   // v5 specific state
   const [namespace, setNamespace] = useState<keyof typeof UUID_NAMESPACES>('DNS');
   const [name, setName] = useState('');
+  
+  // Validation state
+  const [validateInput, setValidateInput] = useState('');
+  const [validationResult, setValidationResult] = useState<boolean | null>(null);
 
   /**
    * Opens the info popup for a specific UUID version
@@ -92,6 +96,27 @@ export const UuidGeneratorScreen: React.FC = () => {
   const handleCopySingle = async (uuid: string) => {
     await Clipboard.setStringAsync(uuid);
     Alert.alert('Copied', 'UUID copied to clipboard');
+  };
+
+  /**
+   * Validates user-input UUID
+   */
+  const handleValidate = () => {
+    if (!validateInput.trim()) {
+      Alert.alert('Input Required', 'Please enter a UUID to validate');
+      return;
+    }
+    
+    const isValid = isValidUUID(validateInput.trim());
+    setValidationResult(isValid);
+  };
+
+  /**
+   * Clears validation input and result
+   */
+  const handleClearValidation = () => {
+    setValidateInput('');
+    setValidationResult(null);
   };
 
   return (
@@ -280,22 +305,96 @@ export const UuidGeneratorScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
 
-              {generatedUUIDs.map((uuid, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[styles.uuidItem, { backgroundColor: colors.card, borderColor: colors.border }]}
-                  onPress={() => handleCopySingle(uuid)}
-                >
-                  <Text style={[styles.uuidText, { color: colors.text }]}>
-                    {uuid}
-                  </Text>
-                  <Text style={[styles.tapToCopy, { color: colors.textSecondary }]}>
-                    Tap to copy
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {generatedUUIDs.map((uuid, index) => {
+                const isValid = isValidUUID(uuid);
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.uuidItem, { backgroundColor: colors.card, borderColor: colors.border }]}
+                    onPress={() => handleCopySingle(uuid)}
+                  >
+                    <View style={styles.uuidContent}>
+                      <View style={styles.uuidTextContainer}>
+                        <Text style={[styles.uuidText, { color: colors.text }]}>
+                          {uuid}
+                        </Text>
+                        <Text style={[styles.tapToCopy, { color: colors.textSecondary }]}>
+                          Tap to copy
+                        </Text>
+                      </View>
+                      {isValid && (
+                        <CheckCircle size={20} color="#10B981" style={styles.validIcon} />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
+
+          {/* Validate UUID Section */}
+          <View style={[styles.validateSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Validate UUID
+            </Text>
+            <Text style={[styles.validateDescription, { color: colors.textSecondary }]}>
+              Check if a UUID is valid and follows the correct format
+            </Text>
+            
+            <TextInput
+              style={[styles.validateInput, { 
+                backgroundColor: colors.background, 
+                color: colors.text, 
+                borderColor: validationResult === null ? colors.border : 
+                            validationResult ? '#10B981' : '#EF4444'
+              }]}
+              value={validateInput}
+              onChangeText={(text) => {
+                setValidateInput(text);
+                setValidationResult(null);
+              }}
+              placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000"
+              placeholderTextColor={colors.textSecondary}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            {validationResult !== null && (
+              <View style={[styles.validationResult, { 
+                backgroundColor: validationResult ? '#10B98115' : '#EF444415',
+                borderColor: validationResult ? '#10B981' : '#EF4444'
+              }]}>
+                {validationResult ? (
+                  <CheckCircle size={20} color="#10B981" style={styles.validationIcon} />
+                ) : (
+                  <XCircle size={20} color="#EF4444" style={styles.validationIcon} />
+                )}
+                <Text style={[styles.validationText, { 
+                  color: validationResult ? '#10B981' : '#EF4444' 
+                }]}>
+                  {validationResult ? 'Valid UUID format' : 'Invalid UUID format'}
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.validateButtons}>
+              <TouchableOpacity
+                style={[styles.validateButton, { backgroundColor: colors.primary }]}
+                onPress={handleValidate}
+              >
+                <Text style={styles.validateButtonText}>Validate</Text>
+              </TouchableOpacity>
+              
+              {validateInput.length > 0 && (
+                <TouchableOpacity
+                  style={[styles.clearButton, { backgroundColor: colors.background, borderColor: colors.border }]}
+                  onPress={handleClearValidation}
+                >
+                  <Text style={[styles.clearButtonText, { color: colors.text }]}>Clear</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
         </View>
       </ScrollView>
 
@@ -506,6 +605,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 8
   },
+  uuidContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  uuidTextContainer: {
+    flex: 1
+  },
   uuidText: {
     fontSize: 14,
     fontFamily: 'monospace',
@@ -513,5 +620,73 @@ const styles = StyleSheet.create({
   },
   tapToCopy: {
     fontSize: 12
+  },
+  validIcon: {
+    marginLeft: 8
+  },
+  validateSection: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1
+  },
+  validateDescription: {
+    fontSize: 14,
+    marginBottom: 16,
+    lineHeight: 20
+  },
+  validateInput: {
+    borderWidth: 2,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    fontFamily: 'monospace',
+    marginBottom: 12
+  },
+  validationResult: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 12
+  },
+  validationIcon: {
+    marginRight: 8
+  },
+  validationText: {
+    fontSize: 14,
+    fontWeight: '600'
+  },
+  validateButtons: {
+    flexDirection: 'row',
+    gap: 8
+  },
+  validateButton: {
+    flex: 1,
+    borderRadius: 8,
+    padding: 14,
+    alignItems: 'center'
+  },
+  validateButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600'
+  },
+  clearButton: {
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  clearButtonText: {
+    fontSize: 15,
+    fontWeight: '600'
   }
 });
