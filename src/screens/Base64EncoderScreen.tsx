@@ -15,7 +15,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Modal, Share } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Modal, Share, Platform } from 'react-native';
 import { ArrowRightLeft, Info, CheckCircle, Copy, X, Trash2, Clock, AlertTriangle, FileText, Download, Share2 } from 'lucide-react-native';
 import { Container, InfoButton } from '../components';
 import { useTheme } from '../theme';
@@ -136,9 +136,14 @@ export const Base64EncoderScreen: React.FC = () => {
         return;
       }
       
-      // For now, we'll just show file info - full file encoding would need updated API
-      Alert.alert('File Selected', `${asset.name} selected\n\nNote: Direct file encoding coming soon. For now, you can copy/paste file contents.`);
+      // Read file content as text
+      const response = await fetch(asset.uri);
+      const text = await response.text();
+      
+      setInputText(text);
       setFileName(asset.name);
+      setHasProcessed(false);
+      setOutputText('');
     } catch (error) {
       Alert.alert('Error', 'Failed to load file');
     }
@@ -148,16 +153,38 @@ export const Base64EncoderScreen: React.FC = () => {
    * Download/Save output (Feature 2)
    */
   const handleDownload = async () => {
-    if (!outputText) return;
+    if (!outputText) {
+      Alert.alert('No Output', 'Please encode or decode some text first');
+      return;
+    }
     
     try {
-      // Use sharing instead of direct file system access
-      await Share.share({
-        message: outputText,
-        title: 'Base64 Output'
-      });
+      // Check if running on web
+      if (Platform.OS === 'web') {
+        // Create a blob and download on web
+        const blob = new Blob([outputText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `base64-output-${Date.now()}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else {
+        // Use Share API on mobile
+        const result = await Share.share({
+          message: outputText,
+          title: 'Base64 Output'
+        });
+        
+        if (result.action === Share.sharedAction) {
+          console.log('Shared successfully');
+        }
+      }
     } catch (error) {
-      Alert.alert('Error', 'Failed to share file');
+      console.error('Download/Share error:', error);
+      Alert.alert('Error', `Failed to download/share: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -210,10 +237,17 @@ export const Base64EncoderScreen: React.FC = () => {
     if (!outputText) return;
     
     try {
-      await Share.share({
-        message: outputText,
-        title: 'Base64 Output'
-      });
+      if (Platform.OS === 'web') {
+        // On web, copy to clipboard
+        await Clipboard.setStringAsync(outputText);
+        Alert.alert('Copied!', 'Output copied to clipboard');
+      } else {
+        // On mobile, use native share
+        await Share.share({
+          message: outputText,
+          title: 'Base64 Output'
+        });
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to share');
     }
@@ -519,13 +553,15 @@ export const Base64EncoderScreen: React.FC = () => {
                   <Text style={[styles.quickActionText, { color: colors.text }]}>Copy & Clear</Text>
                 </TouchableOpacity>
                 
-                <TouchableOpacity
-                  style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                  onPress={handleShare}
-                >
-                  <Share2 size={16} color={colors.text} style={{ marginRight: 4 }} />
-                  <Text style={[styles.quickActionText, { color: colors.text }]}>Share</Text>
-                </TouchableOpacity>
+                {Platform.OS !== 'web' && (
+                  <TouchableOpacity
+                    style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+                    onPress={handleShare}
+                  >
+                    <Share2 size={16} color={colors.text} style={{ marginRight: 4 }} />
+                    <Text style={[styles.quickActionText, { color: colors.text }]}>Share</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           )}
@@ -768,10 +804,13 @@ const styles = StyleSheet.create({
   },
   sectionActions: {
     flexDirection: 'row',
-    gap: 12
+    gap: 12,
+    alignItems: 'center'
   },
   actionButton: {
-    padding: 4
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   successIcon: {
     marginLeft: 6

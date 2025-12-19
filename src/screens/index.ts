@@ -1,4 +1,4 @@
 export * from './HomeScreen';
 export * from './UuidGeneratorScreen';
-export * from './Base64EncoderScreen';
+export { Base64EncoderScreen } from './Base64EncoderScreen';
 

@@ -2,7 +2,8 @@ import React from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '../theme';
-import { HomeScreen, UuidGeneratorScreen, Base64EncoderScreen } from '../screens';
+import { HomeScreen, UuidGeneratorScreen } from '../screens';
+import { Base64EncoderScreen } from '../screens/Base64EncoderScreen';
 import { CustomHeader } from './CustomHeader';
 
 export type RootStackParamList = {
