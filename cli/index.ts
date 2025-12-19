@@ -14,6 +14,7 @@ import { Command } from 'commander';
 import { uuidCommand } from './commands/uuid';
 import { base64Command } from './commands/base64';
 import { jsonCommand } from './commands/json';
+import { loremCommand } from './commands/lorem';
 
 const program = new Command();
 
@@ -26,6 +27,7 @@ program
 program.addCommand(uuidCommand);
 program.addCommand(base64Command);
 program.addCommand(jsonCommand);
+program.addCommand(loremCommand);
 
 // Parse command line arguments
 program.parse();
