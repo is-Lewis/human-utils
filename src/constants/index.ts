@@ -8,7 +8,8 @@ import {
   Globe, 
   Calculator, 
   Palette,
-  Hash
+  Hash,
+  Binary
 } from 'lucide-react-native';
 
 
@@ -31,5 +32,13 @@ export const TOOLS = [
         category: 'dev',
         icon: Hash,
         route: 'UuidGenerator' as const
+    },
+    {
+        id: 'base64-encoder',
+        title: 'Base64 Encoder/Decoder',
+        description: 'Encode and decode text using Base64 encoding',
+        category: 'dev',
+        icon: Binary,
+        route: 'Base64Encoder' as const
     }
 ];
