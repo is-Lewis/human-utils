@@ -9,7 +9,8 @@ import {
   Calculator, 
   Palette,
   Hash,
-  Binary
+  Binary,
+  Braces
 } from 'lucide-react-native';
 
 
@@ -37,8 +38,16 @@ export const TOOLS = [
         id: 'base64-encoder',
         title: 'Base64 Encoder/Decoder',
         description: 'Encode and decode text using Base64 encoding',
-        category: 'dev',
+        category: 'converters',
         icon: Binary,
         route: 'Base64Encoder' as const
+    },
+    {
+        id: 'json-formatter',
+        title: 'JSON Formatter & Validator',
+        description: 'Format, minify, and validate JSON with error detection',
+        category: 'converters',
+        icon: Braces,
+        route: 'JsonFormatter' as const
     }
 ];

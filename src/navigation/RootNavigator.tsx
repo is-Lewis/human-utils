@@ -4,12 +4,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '../theme';
 import { HomeScreen, UuidGeneratorScreen } from '../screens';
 import { Base64EncoderScreen } from '../screens/Base64EncoderScreen';
+import { JsonFormatterScreen } from '../screens/JsonFormatterScreen';
 import { CustomHeader } from './CustomHeader';
 
 export type RootStackParamList = {
   Home: undefined;
   UuidGenerator: undefined;
   Base64Encoder: undefined;
+  JsonFormatter: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -27,6 +29,7 @@ export const RootNavigator = () => {
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="UuidGenerator" component={UuidGeneratorScreen} />
                 <Stack.Screen name="Base64Encoder" component={Base64EncoderScreen} />
+                <Stack.Screen name="JsonFormatter" component={JsonFormatterScreen} />
         </Stack.Navigator>
         </NavigationContainer>
     );
