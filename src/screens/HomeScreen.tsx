@@ -118,7 +118,7 @@ export const HomeScreen = () => {
                 <CategoryCard
                   title={item.title}
                   icon={item.icon}
-                  onPress={() => handleToolPress(item.route)}
+                  onPress={() => handleToolPress(item.route as keyof RootStackParamList)}
                   style={styles.card}
                 />
               );

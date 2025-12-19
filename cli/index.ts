@@ -12,6 +12,7 @@
 
 import { Command } from 'commander';
 import { uuidCommand } from './commands/uuid';
+import { base64Command } from './commands/base64';
 
 const program = new Command();
 
@@ -22,6 +23,7 @@ program
 
 // Register commands
 program.addCommand(uuidCommand);
+program.addCommand(base64Command);
 
 // Parse command line arguments
 program.parse();
