@@ -30,7 +30,7 @@ export const TOOLS = [
         id: 'uuid-generator',
         title: 'UUID Generator & Validator',
         description: 'Generate universally unique identifiers (v1, v4, v5, v7)',
-        category: 'dev',
+        categories: ['dev'],
         icon: Hash,
         route: 'UuidGenerator' as const
     },
@@ -38,7 +38,7 @@ export const TOOLS = [
         id: 'base64-encoder',
         title: 'Base64 Encoder/Decoder',
         description: 'Encode and decode text using Base64 encoding',
-        category: 'converters',
+        categories: ['dev', 'converters'],
         icon: Binary,
         route: 'Base64Encoder' as const
     },
@@ -46,7 +46,7 @@ export const TOOLS = [
         id: 'json-formatter',
         title: 'JSON Formatter & Validator',
         description: 'Format, minify, and validate JSON with error detection',
-        category: 'converters',
+        categories: ['dev', 'converters'],
         icon: Braces,
         route: 'JsonFormatter' as const
     }
