@@ -2,7 +2,7 @@
  * UUID Generator Tool
  * 
  * Provides utilities for generating and validating Universally Unique Identifiers (UUIDs).
- * Supports UUID v4 (random) generation with plans to support additional versions in the future.
+ * Supports UUID v1 (time-based), v4 (random), v5 (name-based SHA-1), and v7 (timestamp-based) generation.
  * 
  * @module tools/uuid-generator
  * @author Lewis Goodwin <https://github.com/is-Lewis>
@@ -56,7 +56,7 @@ const generateCryptoUUID = (): string => {
  */
 const generateV7 = (): string => {
   const timestamp = Date.now();
-  
+
   // Get crypto random values
   const getRandomValues = (length: number): number[] => {
     if (typeof process !== 'undefined' && process.versions?.node) {
@@ -84,31 +84,31 @@ const generateV7 = (): string => {
   };
 
   const randomBytes = getRandomValues(10);
-  
+
   // Extract timestamp parts (48 bits = 6 bytes)
   const timestampHigh = (timestamp / 0x100000000) >>> 0;
   const timestampLow = timestamp >>> 0;
-  
+
   // Format: tttttttt-tttt-7xxx-yxxx-xxxxxxxxxxxx
   // t = timestamp, 7 = version, y = variant (10xx), x = random
-  
+
   const hex = [
     // 32-bit timestamp high
     ((timestampHigh >> 8) & 0xFFFF).toString(16).padStart(4, '0'),
     (timestampHigh & 0xFF).toString(16).padStart(2, '0') +
     ((timestampLow >> 24) & 0xFF).toString(16).padStart(2, '0'),
-    
+
     // 16-bit timestamp low + version
     '7' + ((timestampLow >> 12) & 0xFFF).toString(16).padStart(3, '0'),
-    
+
     // Variant (10xx) + random
     ((randomBytes[0] & 0x3F) | 0x80).toString(16).padStart(2, '0') +
     randomBytes[1].toString(16).padStart(2, '0'),
-    
+
     // 48 random bits
     randomBytes.slice(2, 8).map(b => b.toString(16).padStart(2, '0')).join('')
   ];
-  
+
   return hex.join('-');
 };
 
@@ -131,24 +131,24 @@ const generateV7 = (): string => {
 const generateV1 = (): string => {
   // UUID v1 uses 100-nanosecond intervals since October 15, 1582
   const GREGORIAN_OFFSET = 0x01B21DD213814000n;
-  
+
   // Get current timestamp in 100-nanosecond intervals
   const now = Date.now();
   const timestamp = BigInt(now) * 10000n + GREGORIAN_OFFSET;
-  
+
   // Extract timestamp components
   const timeLow = Number(timestamp & 0xFFFFFFFFn);
   const timeMid = Number((timestamp >> 32n) & 0xFFFFn);
   const timeHi = Number((timestamp >> 48n) & 0x0FFFn);
-  
+
   // Generate random clock sequence (14 bits)
   const clockSeq = Math.floor(Math.random() * 0x4000);
-  
+
   // Generate random node (48 bits) - using random instead of MAC for privacy
   const node = new Array(6).fill(0).map(() => Math.floor(Math.random() * 256));
   // Set multicast bit to indicate this is not a real MAC address
   node[0] |= 0x01;
-  
+
   // Format: tttttttt-tttt-1ttt-yxxx-xxxxxxxxxxxx
   return [
     timeLow.toString(16).padStart(8, '0'),
@@ -157,6 +157,96 @@ const generateV1 = (): string => {
     ((clockSeq & 0x3FFF) | 0x8000).toString(16).padStart(4, '0'),
     node.map(b => b.toString(16).padStart(2, '0')).join('')
   ].join('-');
+};
+
+/**
+ * SHA-1 hash implementation for React Native
+ * Based on the FIPS 180-4 SHA-1 specification
+ */
+const sha1 = (data: Uint8Array): Uint8Array => {
+  // Initialize hash values
+  let h0 = 0x67452301;
+  let h1 = 0xEFCDAB89;
+  let h2 = 0x98BADCFE;
+  let h3 = 0x10325476;
+  let h4 = 0xC3D2E1F0;
+
+  // Pre-processing: adding padding bits
+  const msgLen = data.length;
+  const bitLen = msgLen * 8;
+  
+  // Pad message to 512-bit blocks
+  const paddedLength = Math.ceil((msgLen + 9) / 64) * 64;
+  const padded = new Uint8Array(paddedLength);
+  padded.set(data);
+  padded[msgLen] = 0x80; // Append bit '1'
+  
+  // Append length as 64-bit big-endian
+  const view = new DataView(padded.buffer);
+  view.setUint32(paddedLength - 8, Math.floor(bitLen / 0x100000000), false);
+  view.setUint32(paddedLength - 4, bitLen >>> 0, false);
+
+  // Process each 512-bit block
+  for (let i = 0; i < paddedLength; i += 64) {
+    const w = new Uint32Array(80);
+    
+    // Break block into sixteen 32-bit big-endian words
+    for (let j = 0; j < 16; j++) {
+      w[j] = view.getUint32(i + j * 4, false);
+    }
+    
+    // Extend the sixteen 32-bit words into eighty 32-bit words
+    for (let j = 16; j < 80; j++) {
+      const temp = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16];
+      w[j] = (temp << 1) | (temp >>> 31);
+    }
+    
+    // Initialize working variables
+    let a = h0, b = h1, c = h2, d = h3, e = h4;
+    
+    // Main loop
+    for (let j = 0; j < 80; j++) {
+      let f, k;
+      if (j < 20) {
+        f = (b & c) | ((~b) & d);
+        k = 0x5A827999;
+      } else if (j < 40) {
+        f = b ^ c ^ d;
+        k = 0x6ED9EBA1;
+      } else if (j < 60) {
+        f = (b & c) | (b & d) | (c & d);
+        k = 0x8F1BBCDC;
+      } else {
+        f = b ^ c ^ d;
+        k = 0xCA62C1D6;
+      }
+      
+      const temp = ((a << 5) | (a >>> 27)) + f + e + k + w[j];
+      e = d;
+      d = c;
+      c = (b << 30) | (b >>> 2);
+      b = a;
+      a = temp >>> 0;
+    }
+    
+    // Add this chunk's hash to result
+    h0 = (h0 + a) >>> 0;
+    h1 = (h1 + b) >>> 0;
+    h2 = (h2 + c) >>> 0;
+    h3 = (h3 + d) >>> 0;
+    h4 = (h4 + e) >>> 0;
+  }
+  
+  // Produce the final hash value (big-endian)
+  const result = new Uint8Array(20);
+  const resultView = new DataView(result.buffer);
+  resultView.setUint32(0, h0, false);
+  resultView.setUint32(4, h1, false);
+  resultView.setUint32(8, h2, false);
+  resultView.setUint32(12, h3, false);
+  resultView.setUint32(16, h4, false);
+  
+  return result;
 };
 
 /**
@@ -178,52 +268,45 @@ const generateV1 = (): string => {
  * ```
  */
 export const generateV5 = (namespace: string, name: string): string => {
-  // Get crypto based on platform
-  const getCrypto = () => {
-    if (typeof process !== 'undefined' && process.versions?.node) {
-      return require('crypto');
-    } else {
-      return require('expo-crypto');
-    }
-  };
-
-  const crypto = getCrypto();
-  
   // Convert namespace UUID to bytes
   const namespaceBytes = namespace.replace(/-/g, '').match(/.{2}/g)!.map(byte => parseInt(byte, 16));
-  
+
   // Convert name to bytes
-  const nameBytes = Buffer.from ? Buffer.from(name, 'utf8') : new TextEncoder().encode(name);
-  
+  const encoder = new TextEncoder();
+  const nameBytes = encoder.encode(name);
+
   // Concatenate namespace + name
-  const data = new Uint8Array([...namespaceBytes, ...Array.from(nameBytes)]);
-  
+  const data = new Uint8Array(namespaceBytes.length + nameBytes.length);
+  data.set(namespaceBytes);
+  data.set(nameBytes, namespaceBytes.length);
+
   // Create SHA-1 hash
   let hash: number[];
+  
   if (typeof process !== 'undefined' && process.versions?.node) {
-    // Node.js
+    // Node.js - use built-in crypto
+    const crypto = require('crypto');
     const hashBuffer = crypto.createHash('sha1').update(Buffer.from(data)).digest();
     hash = Array.from(hashBuffer);
   } else {
-    // React Native with expo-crypto
-    // Note: expo-crypto doesn't support SHA-1 directly, so we'll need to use a fallback
-    // For now, throw an error - we can add a SHA-1 polyfill later if needed
-    throw new Error('UUID v5 is not yet supported in React Native environment');
+    // React Native - use pure JS implementation
+    const hashArray = sha1(data);
+    hash = Array.from(hashArray);
   }
-  
+
   // Set version (5) and variant bits
   hash[6] = (hash[6] & 0x0F) | 0x50; // Version 5
   hash[8] = (hash[8] & 0x3F) | 0x80; // Variant 10xx
-  
+
   // Format as UUID
   const hex = hash.slice(0, 16).map(b => b.toString(16).padStart(2, '0')).join('');
-  
+
   return [
-    hex.substr(0, 8),
-    hex.substr(8, 4),
-    hex.substr(12, 4),
-    hex.substr(16, 4),
-    hex.substr(20, 12)
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    hex.slice(12, 16),
+    hex.slice(16, 20),
+    hex.slice(20, 32)
   ].join('-');
 };
 
