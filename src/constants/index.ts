@@ -26,7 +26,7 @@ export const TOOL_CATEGORIES = [
 export const TOOLS = [
     {
         id: 'uuid-generator',
-        title: 'UUID Generator',
+        title: 'UUID Generator & Validator',
         description: 'Generate universally unique identifiers (v1, v4, v5, v7)',
         category: 'dev',
         icon: Hash,
