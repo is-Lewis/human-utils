@@ -22,7 +22,7 @@ export const HomeScreen = () => {
     if (!searchQuery.trim()) {
       // No search - show categories or tools in selected category
       if (selectedCategory) {
-        return TOOLS.filter(tool => tool.category === selectedCategory);
+        return TOOLS.filter(tool => tool.categories.includes(selectedCategory));
       }
       return TOOL_CATEGORIES;
     }
@@ -31,7 +31,9 @@ export const HomeScreen = () => {
     const matchedTools = TOOLS.filter(tool => 
       tool.title.toLowerCase().includes(query) ||
       tool.description.toLowerCase().includes(query) ||
-      TOOL_CATEGORIES.find(cat => cat.id === tool.category)?.title.toLowerCase().includes(query)
+      tool.categories.some(catId => 
+        TOOL_CATEGORIES.find(cat => cat.id === catId)?.title.toLowerCase().includes(query)
+      )
     );
 
     const matchedCategories = TOOL_CATEGORIES.filter(cat =>
