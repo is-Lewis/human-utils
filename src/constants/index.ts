@@ -10,7 +10,8 @@ import {
   Palette,
   Hash,
   Binary,
-  Braces
+  Braces,
+  FileText
 } from 'lucide-react-native';
 
 
@@ -49,5 +50,13 @@ export const TOOLS = [
         categories: ['dev', 'converters'],
         icon: Braces,
         route: 'JsonFormatter' as const
+    },
+    {
+        id: 'lorem-ipsum',
+        title: 'Lorem Ipsum Generator',
+        description: 'Generate placeholder text for design mockups',
+        categories: ['text'],
+        icon: FileText,
+        route: 'LoremIpsum' as const
     }
 ];
