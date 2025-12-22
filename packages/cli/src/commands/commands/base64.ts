@@ -13,16 +13,36 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export const base64Command = new Command('base64')
-  .description('Base64 encoding and decoding utilities');
-
-// Encode command
-base64Command
-  .command('encode [text]')
-  .description('Encode text to Base64')
+  .description('Encode and decode Base64')
+  .argument('[operation]', 'Operation: encode or decode (e = encode, d = decode)')
+  .argument('[text]', 'Text to encode/decode')
   .option('-f, --file <path>', 'Read input from file')
   .option('-o, --output <path>', 'Write output to file')
-  .option('-u, --url-safe', 'Use URL-safe Base64 encoding')
-  .action((text: string | undefined, options: { file?: string; output?: string; urlSafe?: boolean }) => {
+  .option('-u, --url-safe', 'Use URL-safe Base64 (encode only)')
+  .addHelpText('after', `
+Examples:
+  $ hu base64 encode "Hello World"       # Encode text
+  $ hu base64 e "Hello"                  # Short alias
+  $ hu base64 decode SGVsbG8=            # Decode text
+  $ hu base64 d SGVsbG8=                 # Short alias
+  $ hu base64 encode -f input.txt -o encoded.txt
+  $ hu base64 decode -f encoded.txt
+`)
+  .action((operation: string | undefined, text: string | undefined, options) => {
+    if (!operation) {
+      console.error('Error: Please specify operation (encode/e or decode/d)');
+      console.error('Example: hu base64 encode "Hello World"');
+      process.exit(1);
+    }
+
+    const isEncode = operation === 'encode' || operation === 'e';
+    const isDecode = operation === 'decode' || operation === 'd';
+
+    if (!isEncode && !isDecode) {
+      console.error(`Error: Invalid operation "${operation}". Use encode/e or decode/d`);
+      process.exit(1);
+    }
+
     try {
       let inputText = text || '';
       
@@ -30,84 +50,30 @@ base64Command
       if (options.file) {
         const filePath = path.resolve(options.file);
         if (!fs.existsSync(filePath)) {
-          console.error(`\n✗ Error: File not found: ${filePath}`);
+          console.error(`Error: File not found: ${filePath}`);
           process.exit(1);
         }
         inputText = fs.readFileSync(filePath, 'utf-8');
-        console.log(`\n📄 Reading from: ${filePath}`);
       } else if (!text) {
-        console.error('\n✗ Error: Please provide text or use -f to specify a file');
+        console.error('Error: Please provide text or use -f to specify a file');
+        console.error(`Example: hu base64 ${operation} "text here"`);
         process.exit(1);
       }
       
-      const encoded = encodeToBase64(inputText, { urlSafe: options.urlSafe });
+      const result = isEncode 
+        ? encodeToBase64(inputText, { urlSafe: options.urlSafe })
+        : decodeFromBase64(inputText);
       
       // Write to file if specified
       if (options.output) {
         const outputPath = path.resolve(options.output);
-        fs.writeFileSync(outputPath, encoded, 'utf-8');
-        console.log(`\n✓ Encoded and saved to: ${outputPath}`);
+        fs.writeFileSync(outputPath, result, 'utf-8');
+        console.log(`✓ ${isEncode ? 'Encoded' : 'Decoded'} and saved to: ${outputPath}`);
       } else {
-        console.log('\n✓ Encoded:');
-        console.log(encoded);
-      }
-      
-      console.log(`\nInput size: ${inputText.length} characters`);
-      console.log(`Output size: ${encoded.length} characters`);
-      if (options.urlSafe) {
-        console.log('Mode: URL-safe Base64');
+        console.log(result);
       }
     } catch (error) {
-      console.error(`\n✗ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      process.exit(1);
-    }
-  });
-
-// Decode command
-base64Command
-  .command('decode [base64]')
-  .description('Decode Base64 to text')
-  .option('-f, --file <path>', 'Read input from file')
-  .option('-o, --output <path>', 'Write output to file')
-  .action((base64Text: string | undefined, options: { file?: string; output?: string }) => {
-    try {
-      let inputText = base64Text || '';
-      
-      // Read from file if specified
-      if (options.file) {
-        const filePath = path.resolve(options.file);
-        if (!fs.existsSync(filePath)) {
-          console.error(`\n✗ Error: File not found: ${filePath}`);
-          process.exit(1);
-        }
-        inputText = fs.readFileSync(filePath, 'utf-8').trim();
-        console.log(`\n📄 Reading from: ${filePath}`);
-      } else if (!base64Text) {
-        console.error('\n✗ Error: Please provide Base64 text or use -f to specify a file');
-        process.exit(1);
-      }
-      
-      if (!isValidBase64(inputText)) {
-        console.error('\n✗ Error: Invalid Base64 format');
-        process.exit(1);
-      }
-      
-      const decoded = decodeFromBase64(inputText);
-      
-      // Write to file if specified
-      if (options.output) {
-        const outputPath = path.resolve(options.output);
-        fs.writeFileSync(outputPath, decoded, 'utf-8');
-        console.log(`\n✓ Decoded and saved to: ${outputPath}`);
-      } else {
-        console.log('\n✓ Decoded:');
-        console.log(decoded);
-      }
-      
-      console.log(`\nInput size: ${inputText.length} characters`);
-      console.log(`Output size: ${decoded.length} characters`);
-    } catch (error) {
-      console.error(`\n✗ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       process.exit(1);
     }
   });

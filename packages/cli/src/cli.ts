@@ -20,8 +20,19 @@ const program = new Command();
 
 program
   .name('hu')
-  .description('HumanUtils CLI - Developer utilities in your terminal')
-  .version('1.0.0');
+  .description('HumanUtils - Everyday utilities for everyone')
+  .version('1.0.0')
+  .addHelpText('after', `
+Examples:
+  $ hu uuid                                    # Quick UUID v4
+  $ hu uuid v5 example.com --namespace DNS     # Deterministic UUID
+  $ hu base64 encode "Hello World"             # Encode text
+  $ hu json format input.json                  # Format JSON file
+  $ hu lorem 50                                # 50 words of Lorem Ipsum
+  
+Get help for any command:
+  $ hu <command> --help
+`);
 
 // Register commands
 program.addCommand(uuidCommand);
