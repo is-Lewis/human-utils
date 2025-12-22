@@ -1,8 +1,8 @@
 /**
  * Base64 CLI Command
- * 
+ *
  * Command-line interface for Base64 encoding and decoding utilities.
- * 
+ *
  * @module cli/commands/base64
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -19,7 +19,9 @@ export const base64Command = new Command('base64')
   .option('-f, --file <path>', 'Read input from file')
   .option('-o, --output <path>', 'Write output to file')
   .option('-u, --url-safe', 'Use URL-safe Base64 (encode only)')
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 Examples:
   $ hu base64 encode "Hello World"       # Encode text
   $ hu base64 e "Hello"                  # Short alias
@@ -27,7 +29,8 @@ Examples:
   $ hu base64 d SGVsbG8=                 # Short alias
   $ hu base64 encode -f input.txt -o encoded.txt
   $ hu base64 decode -f encoded.txt
-`)
+`
+  )
   .action((operation: string | undefined, text: string | undefined, options) => {
     if (!operation) {
       console.error('Error: Please specify operation (encode/e or decode/d)');
@@ -45,7 +48,7 @@ Examples:
 
     try {
       let inputText = text || '';
-      
+
       // Read from file if specified
       if (options.file) {
         const filePath = path.resolve(options.file);
@@ -59,11 +62,11 @@ Examples:
         console.error(`Example: hu base64 ${operation} "text here"`);
         process.exit(1);
       }
-      
-      const result = isEncode 
+
+      const result = isEncode
         ? encodeToBase64(inputText, { urlSafe: options.urlSafe })
         : decodeFromBase64(inputText);
-      
+
       // Write to file if specified
       if (options.output) {
         const outputPath = path.resolve(options.output);
@@ -84,7 +87,7 @@ base64Command
   .description('Check if text is valid Base64')
   .action((text: string) => {
     const isValid = isValidBase64(text);
-    
+
     if (isValid) {
       console.log('\n✓ Valid Base64 format');
       process.exit(0);

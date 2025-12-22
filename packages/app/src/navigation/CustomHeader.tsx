@@ -1,9 +1,9 @@
 /**
  * Custom Header Component for React Navigation
- * 
+ *
  * Provides a consistent header with theme toggle across all screens.
  * Automatically shows back button on non-home screens.
- * 
+ *
  * @module navigation/CustomHeader
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -17,18 +17,23 @@ import { useTheme } from '../theme';
 
 /**
  * Custom header component for navigation screens
- * 
+ *
  * Shows theme toggle on all screens and back button on non-home screens
  */
 export const CustomHeader: React.FC<NativeStackHeaderProps> = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { colors, spacing, theme, toggleTheme } = useTheme();
-  
+
   const isHomeScreen = route.name === 'Home';
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, paddingHorizontal: spacing.l, paddingTop: spacing.m }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, paddingHorizontal: spacing.l, paddingTop: spacing.m },
+      ]}
+    >
       <View style={styles.content}>
         {/* Back Button (only on non-home screens) */}
         {!isHomeScreen && (
@@ -65,23 +70,23 @@ export const CustomHeader: React.FC<NativeStackHeaderProps> = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 12
+    paddingBottom: 12,
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   backButton: {
     padding: 8,
     marginLeft: -8,
-    flex: 1
+    flex: 1,
   },
   themeButton: {
     padding: 8,
-    marginRight: -8
+    marginRight: -8,
   },
   themeButtonWithBack: {
-    marginLeft: 'auto'
-  }
+    marginLeft: 'auto',
+  },
 });

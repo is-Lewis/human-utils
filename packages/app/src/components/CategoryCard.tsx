@@ -11,11 +11,11 @@ interface CategoryCardProps {
   style?: ViewStyle;
 }
 
-export const CategoryCard: React.FC<CategoryCardProps> = ({ 
-  title, 
-  icon: Icon, 
-  onPress, 
-  style 
+export const CategoryCard: React.FC<CategoryCardProps> = ({
+  title,
+  icon: Icon,
+  onPress,
+  style,
 }) => {
   const { colors } = useTheme();
 
@@ -23,18 +23,21 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
     <TouchableOpacity
       style={[
         styles.card,
-        { 
+        {
           backgroundColor: colors.surface,
-          borderWidth: 1, 
-          borderColor: colors.secondary 
+          borderWidth: 1,
+          borderColor: colors.secondary,
         },
-        style
+        style,
       ]}
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityLabel={title}
+      accessibilityRole="button"
+      accessibilityHint="Tap to open this tool or category"
     >
       <Icon size={32} color={colors.primary} style={styles.icon} />
-      <Text 
+      <Text
         style={[styles.title, { color: colors.text, fontFamily: typography.primary }]}
         numberOfLines={2}
       >

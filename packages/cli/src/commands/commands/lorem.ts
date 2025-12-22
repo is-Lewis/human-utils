@@ -1,8 +1,8 @@
 /**
  * Lorem Ipsum CLI Command
- * 
+ *
  * Command-line interface for lorem ipsum generation.
- * 
+ *
  * @module cli/commands/lorem
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -19,7 +19,9 @@ export const loremCommand = new Command('lorem')
   .option('-s, --start-with-lorem', 'Start with "Lorem ipsum dolor sit amet"')
   .option('--html', 'Wrap paragraphs in <p> tags')
   .option('-o, --output <path>', 'Write output to file')
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 Examples:
   $ hu lorem                      # 50 words (default)
   $ hu lorem 100                  # 100 words
@@ -32,11 +34,12 @@ Aliases:
   $ hu lorem words 50             # Same as 'hu lorem 50'
   $ hu lorem sentences 5          # Same as 'hu lorem 5 -u s'
   $ hu lorem paragraphs 3         # Same as 'hu lorem 3 -u p'
-`)
+`
+  )
   .action((countStr: string, options) => {
     try {
       const count = parseInt(countStr, 10);
-      
+
       if (isNaN(count) || count < 1) {
         console.error('Error: Count must be a positive number');
         process.exit(1);
@@ -54,9 +57,9 @@ Aliases:
         count,
         unit,
         startWithLorem: options.startWithLorem,
-        htmlParagraphs: options.html
+        htmlParagraphs: options.html,
       });
-      
+
       if (options.output) {
         const outputPath = path.resolve(options.output);
         fs.writeFileSync(outputPath, result.text, 'utf-8');

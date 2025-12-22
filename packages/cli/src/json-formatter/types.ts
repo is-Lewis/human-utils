@@ -1,6 +1,6 @@
 /**
  * JSON Formatter Types
- * 
+ *
  * @module tools/json-formatter/types
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -16,10 +16,10 @@ export type JsonOperation = 'format' | 'minify' | 'validate';
 export interface JsonFormatOptions {
   /** Number of spaces for indentation (2 or 4) */
   indentSize?: 2 | 4;
-  
+
   /** Sort object keys alphabetically */
   sortKeys?: boolean;
-  
+
   /** Escape unicode characters */
   escapeUnicode?: boolean;
 }
@@ -30,13 +30,13 @@ export interface JsonFormatOptions {
 export interface JsonValidationResult {
   /** Whether the JSON is valid */
   valid: boolean;
-  
+
   /** Error message if invalid */
   error?: string;
-  
+
   /** Line number of error */
   errorLine?: number;
-  
+
   /** Column number of error */
   errorColumn?: number;
 }
@@ -47,16 +47,16 @@ export interface JsonValidationResult {
 export interface JsonFormatResult {
   /** Whether formatting was successful */
   success: boolean;
-  
+
   /** Formatted or minified JSON string */
   output?: string;
-  
+
   /** Error message if failed */
   error?: string;
-  
+
   /** Original size in bytes */
   originalSize?: number;
-  
+
   /** Formatted size in bytes */
   formattedSize?: number;
 }
@@ -67,19 +67,19 @@ export interface JsonFormatResult {
 export interface JsonHistoryEntry {
   /** Unique identifier */
   id: string;
-  
+
   /** Operation performed */
   operation: JsonOperation;
-  
+
   /** Truncated input (first 100 chars) */
   input: string;
-  
+
   /** Truncated output (first 100 chars) */
   output: string;
-  
+
   /** Timestamp of conversion */
   timestamp: number;
-  
+
   /** Formatting options used */
   options?: JsonFormatOptions;
 }

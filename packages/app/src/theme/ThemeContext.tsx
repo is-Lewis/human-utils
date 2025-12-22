@@ -50,10 +50,10 @@ interface ThemeProviderProps {
 
 /**
  * Theme Provider Component
- * 
+ *
  * Wraps the application to provide theme state and dynamic colors.
  * Automatically detects system color scheme on first load.
- * 
+ *
  * @param props - Component props
  * @returns Provider component
  */
@@ -89,7 +89,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
 /**
  * Hook to access the current theme context
- * 
+ *
  * @returns The current theme context containing theme state and colors
  * @throws Error if used outside of a ThemeProvider
  */

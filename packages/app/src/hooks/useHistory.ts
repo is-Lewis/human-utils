@@ -1,8 +1,8 @@
 /**
  * History Hook
- * 
+ *
  * Generic hook for managing operation history with add, clear, and load functionality.
- * 
+ *
  * @module hooks/useHistory
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -14,12 +14,10 @@ import { LIMITS } from '../constants/limits';
 export interface HistoryEntry {
   id: string;
   timestamp: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
-export const useHistory = <T extends HistoryEntry>(
-  maxItems: number = LIMITS.HISTORY.MAX_ITEMS
-) => {
+export const useHistory = <T extends HistoryEntry>(maxItems: number = LIMITS.HISTORY.MAX_ITEMS) => {
   const [history, setHistory] = useState<T[]>([]);
 
   /**
@@ -39,21 +37,17 @@ export const useHistory = <T extends HistoryEntry>(
    * Clears all history with confirmation
    */
   const clearHistory = (onConfirm?: () => void): void => {
-    Alert.alert(
-      'Clear History',
-      'Are you sure you want to clear all history?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: () => {
-            setHistory([]);
-            if (onConfirm) onConfirm();
-          },
+    Alert.alert('Clear History', 'Are you sure you want to clear all history?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Clear',
+        style: 'destructive',
+        onPress: () => {
+          setHistory([]);
+          if (onConfirm) onConfirm();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   /**

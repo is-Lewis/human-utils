@@ -1,9 +1,9 @@
 /**
  * UUID Generator Tool
- * 
+ *
  * Provides utilities for generating and validating Universally Unique Identifiers (UUIDs).
  * Supports UUID v1 (time-based), v4 (random), v5 (name-based SHA-1), and v7 (timestamp-based) generation.
- * 
+ *
  * @module tools/uuid-generator
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -17,13 +17,13 @@ export { UUID_NAMESPACES };
 
 /**
  * generateCryptoUUID
- * 
+ *
  * Internal helper function to generate a UUID using the appropriate platform's crypto implementation.
  * Uses secure platform-agnostic crypto utilities.
- * 
+ *
  * @returns A UUID v4 string
  * @author Lewis Goodwin <https://github.com/is-Lewis>
- * 
+ *
  * @example
  * ```typescript
  * const uuid = generateCryptoUUID();
@@ -36,14 +36,14 @@ const generateCryptoUUID = (): string => {
 
 /**
  * generateV7
- * 
+ *
  * Generates a UUID v7 (Unix timestamp-based with random bits).
  * Uses a 48-bit Unix timestamp in milliseconds followed by 74 random bits.
  * v7 UUIDs are sortable by creation time, making them ideal for database keys.
- * 
+ *
  * @returns A UUID v7 string
  * @author Lewis Goodwin <https://github.com/is-Lewis>
- * 
+ *
  * @example
  * ```typescript
  * const uuid = generateV7();
@@ -63,19 +63,22 @@ const generateV7 = (): string => {
 
   const hex = [
     // 32-bit timestamp high
-    ((timestampHigh >> 8) & 0xFFFF).toString(16).padStart(4, '0'),
-    (timestampHigh & 0xFF).toString(16).padStart(2, '0') +
-    ((timestampLow >> 24) & 0xFF).toString(16).padStart(2, '0'),
+    ((timestampHigh >> 8) & 0xffff).toString(16).padStart(4, '0'),
+    (timestampHigh & 0xff).toString(16).padStart(2, '0') +
+      ((timestampLow >> 24) & 0xff).toString(16).padStart(2, '0'),
 
     // 16-bit timestamp low + version
-    '7' + ((timestampLow >> 12) & 0xFFF).toString(16).padStart(3, '0'),
+    '7' + ((timestampLow >> 12) & 0xfff).toString(16).padStart(3, '0'),
 
     // Variant (10xx) + random
-    ((randomBytes[0] & 0x3F) | 0x80).toString(16).padStart(2, '0') +
-    randomBytes[1].toString(16).padStart(2, '0'),
+    ((randomBytes[0] & 0x3f) | 0x80).toString(16).padStart(2, '0') +
+      randomBytes[1].toString(16).padStart(2, '0'),
 
     // 48 random bits
-    randomBytes.slice(2, 8).map(b => b.toString(16).padStart(2, '0')).join('')
+    randomBytes
+      .slice(2, 8)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join(''),
   ];
 
   return hex.join('-');
@@ -83,14 +86,14 @@ const generateV7 = (): string => {
 
 /**
  * generateV1
- * 
+ *
  * Generates a UUID v1 (time-based with random node ID).
  * Uses current timestamp and a random node ID (for privacy instead of MAC address).
  * v1 UUIDs can be sorted by creation time but reveal timestamp information.
- * 
+ *
  * @returns A UUID v1 string
  * @author Lewis Goodwin <https://github.com/is-Lewis>
- * 
+ *
  * @example
  * ```typescript
  * const uuid = generateV1();
@@ -99,16 +102,16 @@ const generateV7 = (): string => {
  */
 const generateV1 = (): string => {
   // UUID v1 uses 100-nanosecond intervals since October 15, 1582
-  const GREGORIAN_OFFSET = 0x01B21DD213814000n;
+  const GREGORIAN_OFFSET = 0x01b21dd213814000n;
 
   // Get current timestamp in 100-nanosecond intervals
   const now = Date.now();
   const timestamp = BigInt(now) * 10000n + GREGORIAN_OFFSET;
 
   // Extract timestamp components
-  const timeLow = Number(timestamp & 0xFFFFFFFFn);
-  const timeMid = Number((timestamp >> 32n) & 0xFFFFn);
-  const timeHi = Number((timestamp >> 48n) & 0x0FFFn);
+  const timeLow = Number(timestamp & 0xffffffffn);
+  const timeMid = Number((timestamp >> 32n) & 0xffffn);
+  const timeHi = Number((timestamp >> 48n) & 0x0fffn);
 
   // Generate random clock sequence (14 bits)
   const clockSeq = Math.floor(Math.random() * 0x4000);
@@ -122,24 +125,24 @@ const generateV1 = (): string => {
   return [
     timeLow.toString(16).padStart(8, '0'),
     timeMid.toString(16).padStart(4, '0'),
-    ((timeHi & 0x0FFF) | 0x1000).toString(16).padStart(4, '0'),
-    ((clockSeq & 0x3FFF) | 0x8000).toString(16).padStart(4, '0'),
-    node.map(b => b.toString(16).padStart(2, '0')).join('')
+    ((timeHi & 0x0fff) | 0x1000).toString(16).padStart(4, '0'),
+    ((clockSeq & 0x3fff) | 0x8000).toString(16).padStart(4, '0'),
+    node.map((b) => b.toString(16).padStart(2, '0')).join(''),
   ].join('-');
 };
 
 /**
  * generateV5
- * 
+ *
  * Generates a UUID v5 (name-based using SHA-1 hash).
  * Creates a deterministic UUID from a namespace and name.
  * Same namespace + name always produces the same UUID.
- * 
+ *
  * @param namespace - UUID namespace (use UUID_NAMESPACES constants or custom UUID)
  * @param name - The name to hash
  * @returns A UUID v5 string
  * @author Lewis Goodwin <https://github.com/is-Lewis>
- * 
+ *
  * @example
  * ```typescript
  * const uuid = generateV5(UUID_NAMESPACES.DNS, 'example.com');
@@ -148,7 +151,10 @@ const generateV1 = (): string => {
  */
 export const generateV5 = (namespace: string, name: string): string => {
   // Convert namespace UUID to bytes
-  const namespaceBytes = namespace.replace(/-/g, '').match(/.{2}/g)!.map(byte => parseInt(byte, 16));
+  const namespaceBytes = namespace
+    .replace(/-/g, '')
+    .match(/.{2}/g)!
+    .map((byte) => parseInt(byte, 16));
 
   // Convert name to bytes
   const encoder = new TextEncoder();
@@ -164,32 +170,35 @@ export const generateV5 = (namespace: string, name: string): string => {
   const hash = Array.from(hashArray);
 
   // Set version (5) and variant bits
-  hash[6] = (hash[6] & 0x0F) | 0x50; // Version 5
-  hash[8] = (hash[8] & 0x3F) | 0x80; // Variant 10xx
+  hash[6] = (hash[6] & 0x0f) | 0x50; // Version 5
+  hash[8] = (hash[8] & 0x3f) | 0x80; // Variant 10xx
 
   // Format as UUID
-  const hex = hash.slice(0, 16).map(b => b.toString(16).padStart(2, '0')).join('');
+  const hex = hash
+    .slice(0, 16)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 
   return [
     hex.slice(0, 8),
     hex.slice(8, 12),
     hex.slice(12, 16),
     hex.slice(16, 20),
-    hex.slice(20, 32)
+    hex.slice(20, 32),
   ].join('-');
 };
 
 /**
  * generateUUID
- * 
+ *
  * Generates a single Universally Unique Identifier (UUID) of the specified version.
  * Supports v1, v4, v5, and v7. For v5, use generateV5() directly with namespace and name.
- * 
+ *
  * @param version - The UUID version to generate ('v1', 'v4', 'v5', 'v7')
  * @returns A UUID string in the format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
  * @throws {Error} If an unsupported UUID version is requested or v5 is called without parameters
  * @author Lewis Goodwin <https://github.com/is-Lewis>
- * 
+ *
  * @example
  * ```typescript
  * const uuid = generateUUID('v4');
@@ -213,15 +222,15 @@ export const generateUUID = (version: UUIDVersion = 'v4'): string => {
 
 /**
  * generateMultiple
- * 
+ *
  * Generates an array of UUIDs of the specified count and version.
  * Useful for bulk UUID generation in a single operation.
- * 
+ *
  * @param count - The number of UUIDs to generate (must be >= 1)
  * @param version - The UUID version to generate (defaults to 'v4')
  * @returns An array of UUID strings
  * @author Lewis Goodwin <https://github.com/is-Lewis>
- * 
+ *
  * @example
  * ```typescript
  * const uuids = generateMultiple(3);
@@ -234,14 +243,14 @@ export const generateMultiple = (count: number, version: UUIDVersion = 'v4'): st
 
 /**
  * isValidUUID
- * 
+ *
  * Checks whether a given string matches the standard UUID format.
  * Supports UUID versions 1-5.
- * 
+ *
  * @param uuid - The string to validate
  * @returns True if the string matches UUID format, false otherwise
  * @author Lewis Goodwin <https://github.com/is-Lewis>
- * 
+ *
  * @example
  * ```typescript
  * isValidUUID("550e8400-e29b-41d4-a716-446655440000"); // true
@@ -252,4 +261,3 @@ export const isValidUUID = (uuid: string): boolean => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 };
-

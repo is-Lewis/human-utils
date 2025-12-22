@@ -1,8 +1,8 @@
 /**
  * Application Limits and Constants
- * 
+ *
  * Centralized configuration for limits, thresholds, and magic numbers.
- * 
+ *
  * @module constants/limits
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -57,7 +57,7 @@ export const LIMITS = {
     /** Minimum UUIDs to generate */
     MIN_GENERATE: 1,
     /** UUID v1 Gregorian calendar offset (October 15, 1582) */
-    V1_GREGORIAN_OFFSET: 0x01B21DD213814000n,
+    V1_GREGORIAN_OFFSET: 0x01b21dd213814000n,
     /** Warning threshold for performance */
     PERFORMANCE_WARNING_THRESHOLD: 50,
   },
@@ -95,7 +95,7 @@ export const LIMITS = {
 
 /**
  * Error Messages
- * 
+ *
  * Centralized error messages for consistency across the app.
  */
 export const ERROR_MESSAGES = {
@@ -104,37 +104,40 @@ export const ERROR_MESSAGES = {
   INPUT_EMPTY: 'Input cannot be empty',
 
   // Count validation
-  INVALID_COUNT: (min: number, max: number) =>
-    `Please enter a number between ${min} and ${max}`,
+  INVALID_COUNT: (min: number, max: number) => `Please enter a number between ${min} and ${max}`,
   COUNT_MUST_BE_POSITIVE: 'Count must be a positive number',
-  COUNT_EXCEEDS_LIMIT: (limit: number) => `Count cannot exceed ${limit:,}`,
+  COUNT_EXCEEDS_LIMIT: (limit: number) => `Count cannot exceed ${limit}`,
 
   // File operations
-  FILE_TOO_LARGE: (maxMB: number) =>
-    `Please select a file smaller than ${maxMB}MB`,
+  FILE_TOO_LARGE: (maxMB: number) => `Please select a file smaller than ${maxMB}MB`,
   FILE_INVALID_TYPE: (allowed: string[]) =>
     `Invalid file type. Allowed types: ${allowed.join(', ')}`,
   FILE_LOAD_FAILED: 'Failed to load file',
   FILE_SAVE_FAILED: 'Failed to save file',
 
-  // UUID specific
-  UUID_V5_REQUIRES_PARAMS: 'UUID v5 requires both namespace and name',
-  UUID_INVALID_FORMAT: 'Invalid UUID format',
-  UUID_GENERATION_FAILED: 'Failed to generate UUID',
+  // Output validation
+  OUTPUT_REQUIRED: (action: string) => `Please ${action} first`,
+  OUTPUT_EMPTY: 'No output to display',
 
   // Base64 specific
   BASE64_INVALID_FORMAT: 'Invalid Base64 format',
-  BASE64_DECODE_FAILED: 'Failed to decode Base64',
-  BASE64_ENCODE_FAILED: 'Failed to encode to Base64',
+  BASE64_BATCH_EXCEEDS_LIMIT: (limit: number) => `Batch mode supports up to ${limit} lines`,
 
   // JSON specific
   JSON_INVALID: 'Invalid JSON syntax',
   JSON_FORMAT_FAILED: 'Failed to format JSON',
   JSON_MINIFY_FAILED: 'Failed to minify JSON',
   JSON_PARSE_ERROR: (line?: number, col?: number) =>
-    line && col
-      ? `JSON parse error at line ${line}, column ${col}`
-      : 'JSON parse error',
+    line && col ? `JSON parse error at line ${line}, column ${col}` : 'JSON parse error',
+
+  // UUID specific
+  UUID_INVALID_COUNT: (max: number) => `Please enter a number between 1 and ${max}`,
+  UUID_NAME_REQUIRED: 'Please enter a name for v5 UUID generation',
+  UUID_GENERATE_FAILED: 'Failed to generate UUID',
+
+  // Download operations
+  DOWNLOAD_FAILED: 'Failed to download file',
+  SHARE_FAILED: 'Failed to share content',
 
   // Generic
   UNKNOWN_ERROR: 'An unknown error occurred',
@@ -144,7 +147,7 @@ export const ERROR_MESSAGES = {
 
 /**
  * Success Messages
- * 
+ *
  * Centralized success messages for consistency.
  */
 export const SUCCESS_MESSAGES = {
@@ -154,18 +157,20 @@ export const SUCCESS_MESSAGES = {
   GENERATED: 'Generated successfully',
   CLEARED: 'Cleared successfully',
   VALIDATED: 'Validation successful',
+  OUTPUT_COPIED: 'Output copied to clipboard',
+  JSON_VALID: 'The JSON syntax is correct',
+  UUID_COPIED: (count: number) => `${count} UUID(s) copied to clipboard`,
+  UUID_COPIED_SINGLE: 'UUID copied to clipboard',
 } as const;
 
 /**
  * Warning Messages
- * 
+ *
  * User warnings for potentially problematic operations.
  */
 export const WARNING_MESSAGES = {
-  LARGE_OPERATION: (count: number) =>
-    `Generating ${count:,} items may take a moment...`,
-  PERFORMANCE_IMPACT: (count: number) =>
-    `Generating ${count:,} items may impact performance`,
+  LARGE_OPERATION: (count: number) => `Generating ${count} items may take a moment...`,
+  PERFORMANCE_IMPACT: (count: number) => `Generating ${count} items may impact performance`,
   HISTORY_CLEARED: 'All history will be permanently deleted',
   DATA_LOSS: 'Unsaved changes will be lost',
 } as const;

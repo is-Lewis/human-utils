@@ -1,9 +1,9 @@
 /**
  * HumanUtils CLI Library
- * 
+ *
  * Programmatic API for HumanUtils developer utilities.
  * Can be used as a library in Node.js applications.
- * 
+ *
  * @module @human-utils/cli
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */

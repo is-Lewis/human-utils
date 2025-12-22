@@ -1,8 +1,8 @@
 /**
  * Base64 Encoder/Decoder Types
- * 
+ *
  * Type definitions for the Base64 encoding and decoding tool.
- * 
+ *
  * @module tools/base64-encoder/types
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */

@@ -8,16 +8,10 @@ interface ContainerProps {
   maxWidth?: number;
 }
 
-export const Container: React.FC<ContainerProps> = ({ 
-  children, 
-  style,
-  maxWidth = 800
-}) => {
+export const Container: React.FC<ContainerProps> = ({ children, style, maxWidth = 800 }) => {
   return (
     <View style={[styles.outer, style]}>
-      <View style={[styles.inner, { maxWidth }]}>
-        {children}
-      </View>
+      <View style={[styles.inner, { maxWidth }]}>{children}</View>
     </View>
   );
 };

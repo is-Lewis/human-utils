@@ -1,9 +1,9 @@
 /**
  * ToolHeader Component
- * 
+ *
  * A reusable header for tool screens with back navigation and theme toggle.
  * Provides consistent navigation and theme switching across all tool screens.
- * 
+ *
  * @module components/ToolHeader
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -21,10 +21,10 @@ interface ToolHeaderProps {
 
 /**
  * Header component for tool screens with navigation and theme toggle
- * 
+ *
  * @param {string} title - The main title of the tool
  * @param {string} subtitle - Optional subtitle/description
- * 
+ *
  * @example
  * <ToolHeader title="UUID Generator" subtitle="Generate universally unique identifiers" />
  */
@@ -58,13 +58,9 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({ title, subtitle }) => {
         </TouchableOpacity>
       </View>
 
-      <Text style={[styles.title, { color: colors.text }]}>
-        {title}
-      </Text>
+      <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       {subtitle && (
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          {subtitle}
-        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
       )}
     </View>
   );
@@ -72,28 +68,28 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({ title, subtitle }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%'
+    width: '100%',
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16
+    marginBottom: 16,
   },
   backButton: {
     padding: 8,
-    marginLeft: -8
+    marginLeft: -8,
   },
   themeButton: {
     padding: 8,
-    marginRight: -8
+    marginRight: -8,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 4
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16
-  }
+    fontSize: 16,
+  },
 });

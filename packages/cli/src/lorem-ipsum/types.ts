@@ -1,6 +1,6 @@
 /**
  * Lorem Ipsum Generator Types
- * 
+ *
  * @module tools/lorem-ipsum/types
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -16,13 +16,13 @@ export type LoremUnit = 'words' | 'sentences' | 'paragraphs';
 export interface LoremOptions {
   /** Number of units to generate */
   count: number;
-  
+
   /** Unit type */
   unit: LoremUnit;
-  
+
   /** Start with "Lorem ipsum dolor sit amet" */
   startWithLorem?: boolean;
-  
+
   /** Include HTML paragraph tags */
   htmlParagraphs?: boolean;
 }
@@ -33,13 +33,13 @@ export interface LoremOptions {
 export interface LoremResult {
   /** Generated text */
   text: string;
-  
+
   /** Word count */
   wordCount: number;
-  
+
   /** Character count */
   charCount: number;
-  
+
   /** Paragraph count */
   paragraphCount: number;
 }

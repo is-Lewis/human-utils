@@ -1,9 +1,9 @@
 /**
  * InfoPopup Component
- * 
+ *
  * A dismissible modal popup that displays detailed information about a UUID version.
  * Shows features, use cases, and other metadata to help users understand each version.
- * 
+ *
  * @module components/InfoPopup
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -21,13 +21,13 @@ interface InfoPopupProps {
 
 /**
  * A modal popup displaying detailed information about a UUID version
- * 
+ *
  * @param {boolean} visible - Whether the popup is visible
  * @param {Function} onClose - Callback when popup is dismissed
  * @param {UUIDVersionMetadata} metadata - The UUID version metadata to display
- * 
+ *
  * @example
- * <InfoPopup 
+ * <InfoPopup
  *   visible={showPopup}
  *   onClose={() => setShowPopup(false)}
  *   metadata={UUID_VERSION_METADATA.v4}
@@ -37,18 +37,9 @@ export const InfoPopup: React.FC<InfoPopupProps> = ({ visible, onClose, metadata
   const { colors, spacing } = useTheme();
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity 
-        style={styles.overlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <View 
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
+        <View
           style={[styles.popup, { backgroundColor: colors.card }]}
           onStartShouldSetResponder={() => true}
         >
@@ -71,30 +62,22 @@ export const InfoPopup: React.FC<InfoPopupProps> = ({ visible, onClose, metadata
 
               {/* Features */}
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.primary }]}>
-                  Features
-                </Text>
+                <Text style={[styles.sectionTitle, { color: colors.primary }]}>Features</Text>
                 {metadata.features.map((feature, index) => (
                   <View key={index} style={styles.listItem}>
                     <Text style={[styles.bullet, { color: colors.primary }]}>•</Text>
-                    <Text style={[styles.listText, { color: colors.text }]}>
-                      {feature}
-                    </Text>
+                    <Text style={[styles.listText, { color: colors.text }]}>{feature}</Text>
                   </View>
                 ))}
               </View>
 
               {/* Use Cases */}
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.primary }]}>
-                  Use Cases
-                </Text>
+                <Text style={[styles.sectionTitle, { color: colors.primary }]}>Use Cases</Text>
                 {metadata.useCases.map((useCase, index) => (
                   <View key={index} style={styles.listItem}>
                     <Text style={[styles.bullet, { color: colors.primary }]}>•</Text>
-                    <Text style={[styles.listText, { color: colors.text }]}>
-                      {useCase}
-                    </Text>
+                    <Text style={[styles.listText, { color: colors.text }]}>{useCase}</Text>
                   </View>
                 ))}
               </View>
@@ -120,7 +103,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: 20,
   },
   popup: {
     borderRadius: 12,
@@ -131,56 +114,56 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
-    elevation: 5
+    elevation: 5,
   },
   header: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 4
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16
+    fontSize: 16,
   },
   description: {
     fontSize: 15,
     lineHeight: 22,
-    marginBottom: 20
+    marginBottom: 20,
   },
   section: {
-    marginBottom: 20
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 12
+    marginBottom: 12,
   },
   listItem: {
     flexDirection: 'row',
     marginBottom: 8,
-    paddingLeft: 4
+    paddingLeft: 4,
   },
   bullet: {
     fontSize: 16,
     marginRight: 8,
-    marginTop: 2
+    marginTop: 2,
   },
   listText: {
     fontSize: 14,
     lineHeight: 20,
-    flex: 1
+    flex: 1,
   },
   closeButton: {
     borderRadius: 8,
     padding: 14,
     alignItems: 'center',
-    marginTop: 8
+    marginTop: 8,
   },
   closeButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600'
-  }
+    fontWeight: '600',
+  },
 });

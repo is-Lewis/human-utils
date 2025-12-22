@@ -2,10 +2,10 @@
 
 /**
  * HumanUtils CLI Entry Point
- * 
+ *
  * Command-line interface for HumanUtils developer utilities.
  * Provides access to all tools via terminal commands.
- * 
+ *
  * @module cli
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -22,7 +22,9 @@ program
   .name('hu')
   .description('HumanUtils - Everyday utilities for everyone')
   .version('1.0.0')
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 Examples:
   $ hu uuid                                    # Quick UUID v4
   $ hu uuid v5 example.com --namespace DNS     # Deterministic UUID
@@ -32,7 +34,8 @@ Examples:
   
 Get help for any command:
   $ hu <command> --help
-`);
+`
+  );
 
 // Register commands
 program.addCommand(uuidCommand);

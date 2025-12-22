@@ -1,9 +1,9 @@
 /**
  * ErrorBoundary Component
- * 
+ *
  * Catches React errors and displays a fallback UI.
  * Logs errors to the Logger service for debugging and tracking.
- * 
+ *
  * @module components/ErrorBoundary
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -72,11 +72,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <View style={styles.container}>
           <View style={styles.content}>
             <AlertTriangle size={64} color="#EF4444" style={styles.icon} />
-            
+
             <Text style={styles.title}>Oops! Something went wrong</Text>
-            
+
             <Text style={styles.message}>
-              The app encountered an unexpected error. Don't worry, your data is safe.
+              The app encountered an unexpected error. Don&apos;t worry, your data is safe.
             </Text>
 
             {__DEV__ && this.state.error && (
@@ -101,9 +101,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <Text style={styles.buttonText}>Try Again</Text>
             </TouchableOpacity>
 
-            <Text style={styles.helpText}>
-              If this problem persists, please contact support.
-            </Text>
+            <Text style={styles.helpText}>If this problem persists, please contact support.</Text>
           </View>
         </View>
       );

@@ -1,18 +1,18 @@
 /**
  * Logger Service
- * 
+ *
  * Centralized logging with environment-aware behavior.
  * In development: logs to console
  * In production: can integrate with error tracking services
- * 
+ *
  * @module services/Logger
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type _LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LogContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class LoggerService {
@@ -23,6 +23,7 @@ class LoggerService {
    */
   debug(message: string, context?: LogContext): void {
     if (this.isDevelopment) {
+      // eslint-disable-next-line no-console
       console.log(`[DEBUG] ${message}`, context || '');
     }
   }
@@ -32,6 +33,7 @@ class LoggerService {
    */
   info(message: string, context?: LogContext): void {
     if (this.isDevelopment) {
+      // eslint-disable-next-line no-console
       console.log(`[INFO] ${message}`, context || '');
     }
   }
@@ -47,11 +49,14 @@ class LoggerService {
    * Logs error messages with stack traces
    */
   error(message: string, error?: Error | unknown, context?: LogContext): void {
-    const errorInfo = error instanceof Error ? {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-    } : { error };
+    const errorInfo =
+      error instanceof Error
+        ? {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+          }
+        : { error };
 
     console.error(`[ERROR] ${message}`, { ...errorInfo, ...context });
 
@@ -66,6 +71,7 @@ class LoggerService {
    */
   performance(label: string, duration: number, context?: LogContext): void {
     if (this.isDevelopment) {
+      // eslint-disable-next-line no-console
       console.log(`[PERF] ${label}: ${duration.toFixed(2)}ms`, context || '');
     }
   }
@@ -85,13 +91,10 @@ class LoggerService {
    * Sends error to external tracking service (placeholder)
    * In production, integrate with Sentry, LogRocket, etc.
    */
-  private sendToErrorTracking(
-    message: string,
-    error: Error,
-    context?: LogContext
-  ): void {
+  private sendToErrorTracking(message: string, error: Error, _context?: LogContext): void {
     // TODO: Integrate with error tracking service
     // Example: Sentry.captureException(error, { tags: context });
+    // eslint-disable-next-line no-console
     console.error('Error tracking not configured:', message, error);
   }
 
@@ -100,6 +103,7 @@ class LoggerService {
    */
   logUserAction(action: string, properties?: LogContext): void {
     if (this.isDevelopment) {
+      // eslint-disable-next-line no-console
       console.log(`[USER ACTION] ${action}`, properties || '');
     }
     // TODO: Integrate with analytics service

@@ -1,8 +1,8 @@
 /**
  * Clipboard Hook
- * 
+ *
  * Reusable hook for clipboard operations with consistent error handling and messaging.
- * 
+ *
  * @module hooks/useClipboard
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */

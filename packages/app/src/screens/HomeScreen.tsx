@@ -22,21 +22,24 @@ export const HomeScreen = () => {
     if (!searchQuery.trim()) {
       // No search - show categories or tools in selected category
       if (selectedCategory) {
-        return TOOLS.filter(tool => tool.categories.includes(selectedCategory));
+        return TOOLS.filter((tool) => tool.categories.includes(selectedCategory));
       }
       return TOOL_CATEGORIES;
     }
 
     const query = searchQuery.toLowerCase();
-    const matchedTools = TOOLS.filter(tool => 
-      tool.title.toLowerCase().includes(query) ||
-      tool.description.toLowerCase().includes(query) ||
-      tool.categories.some(catId => 
-        TOOL_CATEGORIES.find(cat => cat.id === catId)?.title.toLowerCase().includes(query)
-      )
+    const matchedTools = TOOLS.filter(
+      (tool) =>
+        tool.title.toLowerCase().includes(query) ||
+        tool.description.toLowerCase().includes(query) ||
+        tool.categories.some((catId) =>
+          TOOL_CATEGORIES.find((cat) => cat.id === catId)
+            ?.title.toLowerCase()
+            .includes(query)
+        )
     );
 
-    const matchedCategories = TOOL_CATEGORIES.filter(cat =>
+    const matchedCategories = TOOL_CATEGORIES.filter((cat) =>
       cat.title.toLowerCase().includes(query)
     );
 
@@ -68,15 +71,26 @@ export const HomeScreen = () => {
             <View style={styles.headerContainer}>
               {/* Centered Hero Section */}
               <View style={styles.hero}>
-                <Text style={[styles.logoIcon, { color: colors.primary, fontFamily: typography.code }]}>
+                <Text
+                  style={[styles.logoIcon, { color: colors.primary, fontFamily: typography.code }]}
+                >
                   &gt;_
                 </Text>
-                <Text style={[styles.title, { color: colors.text, fontFamily: typography.primary }]}>{APP_NAME}</Text>
-                <Text style={[styles.subtitle, { color: colors.textMuted, fontFamily: typography.primary }]}>
+                <Text
+                  style={[styles.title, { color: colors.text, fontFamily: typography.primary }]}
+                >
+                  {APP_NAME}
+                </Text>
+                <Text
+                  style={[
+                    styles.subtitle,
+                    { color: colors.textMuted, fontFamily: typography.primary },
+                  ]}
+                >
                   Trustworthy. Useful. Honest.
                 </Text>
               </View>
-              
+
               <SearchBar
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -85,10 +99,12 @@ export const HomeScreen = () => {
               />
 
               {/* Back to Categories Button */}
-              {(selectedCategory && !isSearching) && (
-                <TouchableOpacity 
+              {selectedCategory && !isSearching && (
+                <TouchableOpacity
                   style={styles.backButton}
                   onPress={() => setSelectedCategory(null)}
+                  accessibilityLabel="Back to categories"
+                  accessibilityRole="button"
                 >
                   <Text style={[styles.backText, { color: colors.primary }]}>
                     ← Back to Categories
@@ -107,7 +123,7 @@ export const HomeScreen = () => {
               {isSearching && searchResults.length === 0 && (
                 <View style={styles.noResults}>
                   <Text style={[styles.noResultsText, { color: colors.textMuted }]}>
-                    No tools or categories found for "{searchQuery}"
+                    No tools or categories found for &quot;{searchQuery}&quot;
                   </Text>
                 </View>
               )}

@@ -19,21 +19,21 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
-    const { theme } = useTheme();
+  const { theme } = useTheme();
 
-    return (
-        <NavigationContainer theme={theme === 'dark' ? DarkTheme : DefaultTheme }>
-            <Stack.Navigator
-                screenOptions={{
-                    header: (props) => <CustomHeader {...props} />,
-                }}
-            >
-                <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen name="UuidGenerator" component={UuidGeneratorScreen} />
-                <Stack.Screen name="Base64Encoder" component={Base64EncoderScreen} />
-                <Stack.Screen name="JsonFormatter" component={JsonFormatterScreen} />
-                <Stack.Screen name="LoremIpsum" component={LoremIpsumScreen} />
-        </Stack.Navigator>
-        </NavigationContainer>
-    );
+  return (
+    <NavigationContainer theme={theme === 'dark' ? DarkTheme : DefaultTheme}>
+      <Stack.Navigator
+        screenOptions={{
+          header: (props) => <CustomHeader {...props} />,
+        }}
+      >
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="UuidGenerator" component={UuidGeneratorScreen} />
+        <Stack.Screen name="Base64Encoder" component={Base64EncoderScreen} />
+        <Stack.Screen name="JsonFormatter" component={JsonFormatterScreen} />
+        <Stack.Screen name="LoremIpsum" component={LoremIpsumScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 };

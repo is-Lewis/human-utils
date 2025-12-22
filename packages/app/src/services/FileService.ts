@@ -1,9 +1,9 @@
 /**
  * File Service
- * 
+ *
  * Platform-agnostic file operations (upload, download, share).
  * Abstracts platform-specific implementations for web and mobile.
- * 
+ *
  * @module services/FileService
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
@@ -60,9 +60,7 @@ class FileServiceClass {
   /**
    * Picks and reads a file
    */
-  async pickFile(
-    options: FileValidationOptions = {}
-  ): Promise<FilePickResult | null> {
+  async pickFile(options: FileValidationOptions = {}): Promise<FilePickResult | null> {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: options.allowedTypes || '*/*',
@@ -130,11 +128,7 @@ class FileServiceClass {
   /**
    * Downloads file on web platform
    */
-  private downloadFileWeb(
-    content: string,
-    filename: string,
-    mimeType: string
-  ): boolean {
+  private downloadFileWeb(content: string, filename: string, mimeType: string): boolean {
     try {
       const blob = new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
@@ -157,10 +151,7 @@ class FileServiceClass {
   /**
    * Shares file on mobile platforms
    */
-  private async shareFileMobile(
-    content: string,
-    filename: string
-  ): Promise<boolean> {
+  private async shareFileMobile(content: string, filename: string): Promise<boolean> {
     try {
       const result = await Share.share({
         message: content,

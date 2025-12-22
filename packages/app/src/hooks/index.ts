@@ -1,8 +1,8 @@
 /**
  * Custom Hooks
- * 
+ *
  * Central export for all custom hooks.
- * 
+ *
  * @module hooks
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
