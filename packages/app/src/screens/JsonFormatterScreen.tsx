@@ -1,128 +1,154 @@
 /**
- * Base64 Encoder/Decoder Screen - Enhanced
+ * JSON Formatter/Validator Screen
  * 
- * Advanced Base64 encoding/decoding with:
- * - File upload/download support
- * - Auto-detection of Base64 format
- * - URL-safe Base64 option
- * - Batch processing (multi-line)
- * - Conversion history
- * - Size comparison visualization
- * - Quick actions (copy & clear, share)
+ * Features:
+ * - Format JSON with customizable indentation
+ * - Minify JSON (remove whitespace)
+ * - Validate JSON with error highlighting
+ * - Sort object keys alphabetically
+ * - History of recent operations
+ * - Copy/share functionality
+ * - File upload/download
  * 
- * @module screens/Base64EncoderScreen
+ * @module screens/JsonFormatterScreen
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Modal, Share, Platform } from 'react-native';
-import { ArrowRightLeft, Info, CheckCircle, Copy, X, Trash2, Clock, AlertTriangle, FileText, Download, Share2 } from 'lucide-react-native';
+import { Info, CheckCircle, Copy, X, Trash2, Clock, AlertTriangle, Download, Settings } from 'lucide-react-native';
 import { Container, InfoButton } from '../components';
 import { useTheme } from '../theme';
-import { Base64Operation, Base64HistoryEntry } from '../tools/base64-encoder/types';
-import { BASE64_INFO } from '../tools/base64-encoder/metadata';
-import { encodeToBase64, decodeFromBase64, isValidBase64, detectBase64, processBatch } from '../tools/base64-encoder';
+import { 
+  JsonOperation, 
+  JsonHistoryEntry, 
+  JsonFormatOptions,
+  JSON_INFO,
+  formatJson, 
+  minifyJson, 
+  validateJson, 
+  getJsonInfo 
+} from '@human-utils/cli';
 import * as Clipboard from 'expo-clipboard';
 import * as DocumentPicker from 'expo-document-picker';
 
 const MAX_HISTORY = 10;
 
-export const Base64EncoderScreen: React.FC = () => {
+export const JsonFormatterScreen: React.FC = () => {
   const { colors, spacing } = useTheme();
   
   // State
-  const [operation, setOperation] = useState<Base64Operation>('encode');
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [showInfoPopup, setShowInfoPopup] = useState(false);
   const [hasProcessed, setHasProcessed] = useState(false);
-  const [urlSafe, setUrlSafe] = useState(false);
-  const [batchMode, setBatchMode] = useState(false);
-  const [history, setHistory] = useState<Base64HistoryEntry[]>([]);
+  const [history, setHistory] = useState<JsonHistoryEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
+  
+  // Options
+  const [indentSize, setIndentSize] = useState<2 | 4>(2);
+  const [sortKeys, setSortKeys] = useState(false);
+  const [escapeUnicode, setEscapeUnicode] = useState(false);
 
-  // Auto-detect Base64 in input (Feature 3)
-  const isLikelyBase64 = useMemo(() => {
-    if (!inputText || inputText.length < 10) return false;
-    return detectBase64(inputText);
+  // Validation state
+  const validation = useMemo(() => {
+    if (!inputText.trim()) return null;
+    return validateJson(inputText);
   }, [inputText]);
 
-  // Calculate sizes and efficiency (Feature 7)
-  const inputSize = useMemo(() => new Blob([inputText]).size, [inputText]);
-  const outputSize = useMemo(() => new Blob([outputText]).size, [outputText]);
-  const sizeRatio = useMemo(() => {
-    if (!inputSize || !outputSize) return 0;
-    return ((outputSize / inputSize) * 100).toFixed(1);
-  }, [inputSize, outputSize]);
+  // JSON info
+  const jsonInfo = useMemo(() => {
+    if (!validation?.valid) return null;
+    return getJsonInfo(inputText);
+  }, [inputText, validation]);
 
   /**
-   * Add entry to history (Feature 6)
+   * Add entry to history
    */
-  const addToHistory = (input: string, output: string, op: Base64Operation) => {
-    const entry: Base64HistoryEntry = {
+  const addToHistory = (input: string, output: string, op: JsonOperation) => {
+    const entry: JsonHistoryEntry = {
       id: Date.now().toString(),
       operation: op,
       input: input.substring(0, 100),
       output: output.substring(0, 100),
       timestamp: Date.now(),
-      urlSafe
+      options: { indentSize, sortKeys, escapeUnicode }
     };
     
     setHistory(prev => [entry, ...prev].slice(0, MAX_HISTORY));
   };
 
   /**
-   * Processes the input based on selected operation
+   * Format JSON
    */
-  const handleProcess = () => {
+  const handleFormat = () => {
     if (!inputText.trim()) {
-      Alert.alert('Input Required', 'Please enter some text to process');
+      Alert.alert('Input Required', 'Please enter JSON to format');
       return;
     }
 
-    try {
-      let result: string;
-      
-      if (batchMode) {
-        // Batch processing (Feature 5)
-        const results = processBatch(inputText, operation, { urlSafe });
-        const outputs = results.map(r => r.success ? r.output : `ERROR: ${r.error}`);
-        result = outputs.join('\n');
-        
-        const failedCount = results.filter(r => !r.success).length;
-        if (failedCount > 0) {
-          Alert.alert('Batch Complete', `Processed ${results.length} lines\n${failedCount} failed`);
-        }
-      } else {
-        // Single processing
-        if (operation === 'encode') {
-          result = encodeToBase64(inputText, { urlSafe }); // Feature 4: URL-safe
-        } else {
-          if (!isValidBase64(inputText.trim())) {
-            Alert.alert('Invalid Base64', 'The input is not valid Base64 format');
-            return;
-          }
-          result = decodeFromBase64(inputText);
-        }
-      }
-      
-      setOutputText(result);
-      setHasProcessed(true);
-      addToHistory(inputText, result, operation);
-      setFileName(null);
-    } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to process text');
+    const result = formatJson(inputText, { indentSize, sortKeys, escapeUnicode });
+    
+    if (!result.success) {
+      Alert.alert('Invalid JSON', result.error || 'Failed to format JSON');
+      return;
+    }
+
+    setOutputText(result.output!);
+    setHasProcessed(true);
+    addToHistory(inputText, result.output!, 'format');
+  };
+
+  /**
+   * Minify JSON
+   */
+  const handleMinify = () => {
+    if (!inputText.trim()) {
+      Alert.alert('Input Required', 'Please enter JSON to minify');
+      return;
+    }
+
+    const result = minifyJson(inputText);
+    
+    if (!result.success) {
+      Alert.alert('Invalid JSON', result.error || 'Failed to minify JSON');
+      return;
+    }
+
+    setOutputText(result.output!);
+    setHasProcessed(true);
+    addToHistory(inputText, result.output!, 'minify');
+  };
+
+  /**
+   * Validate JSON
+   */
+  const handleValidate = () => {
+    if (!inputText.trim()) {
+      Alert.alert('Input Required', 'Please enter JSON to validate');
+      return;
+    }
+
+    const result = validateJson(inputText);
+    
+    if (result.valid) {
+      Alert.alert('✓ Valid JSON', 'The JSON syntax is correct');
+    } else {
+      const message = result.errorLine 
+        ? `${result.error}\n\nLine: ${result.errorLine}, Column: ${result.errorColumn}`
+        : result.error;
+      Alert.alert('✗ Invalid JSON', message);
     }
   };
 
   /**
-   * Pick and encode file (Feature 2)
+   * Pick and load JSON file
    */
   const handlePickFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
+        type: ['application/json', 'text/plain'],
         copyToCacheDirectory: true
       });
       
@@ -136,12 +162,11 @@ export const Base64EncoderScreen: React.FC = () => {
         return;
       }
       
-      // Read file content as text
+      // Read file content
       const response = await fetch(asset.uri);
       const text = await response.text();
       
       setInputText(text);
-      setFileName(asset.name);
       setHasProcessed(false);
       setOutputText('');
     } catch (error) {
@@ -150,54 +175,33 @@ export const Base64EncoderScreen: React.FC = () => {
   };
 
   /**
-   * Download/Save output (Feature 2)
+   * Download/Save output
    */
   const handleDownload = async () => {
     if (!outputText) {
-      Alert.alert('No Output', 'Please encode or decode some text first');
+      Alert.alert('No Output', 'Please format or minify JSON first');
       return;
     }
     
     try {
-      // Check if running on web
       if (Platform.OS === 'web') {
-        // Create a blob and download on web
-        const blob = new Blob([outputText], { type: 'text/plain' });
+        const blob = new Blob([outputText], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `base64-output-${Date.now()}.txt`;
+        link.download = `formatted-${Date.now()}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       } else {
-        // Use Share API on mobile
-        const result = await Share.share({
+        await Share.share({
           message: outputText,
-          title: 'Base64 Output'
+          title: 'Formatted JSON'
         });
-        
-        if (result.action === Share.sharedAction) {
-          console.log('Shared successfully');
-        }
       }
     } catch (error) {
-      console.error('Download/Share error:', error);
       Alert.alert('Error', `Failed to download/share: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
-
-  /**
-   * Switches between encode and decode
-   */
-  const handleSwitchOperation = () => {
-    const newOperation: Base64Operation = operation === 'encode' ? 'decode' : 'encode';
-    setOperation(newOperation);
-    
-    if (hasProcessed && outputText) {
-      setInputText(outputText);
-      setOutputText(inputText);
     }
   };
 
@@ -208,7 +212,6 @@ export const Base64EncoderScreen: React.FC = () => {
     setInputText('');
     setOutputText('');
     setHasProcessed(false);
-    setFileName(null);
   };
 
   /**
@@ -221,39 +224,6 @@ export const Base64EncoderScreen: React.FC = () => {
   };
 
   /**
-   * Copy and clear (Feature 8)
-   */
-  const handleCopyAndClear = async () => {
-    if (!outputText) return;
-    await Clipboard.setStringAsync(outputText);
-    handleClear();
-    Alert.alert('Copied & Cleared', 'Output copied and inputs cleared');
-  };
-
-  /**
-   * Share output (Feature 8)
-   */
-  const handleShare = async () => {
-    if (!outputText) return;
-    
-    try {
-      if (Platform.OS === 'web') {
-        // On web, copy to clipboard
-        await Clipboard.setStringAsync(outputText);
-        Alert.alert('Copied!', 'Output copied to clipboard');
-      } else {
-        // On mobile, use native share
-        await Share.share({
-          message: outputText,
-          title: 'Base64 Output'
-        });
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to share');
-    }
-  };
-
-  /**
    * Pastes from clipboard to input
    */
   const handlePasteInput = async () => {
@@ -262,22 +232,22 @@ export const Base64EncoderScreen: React.FC = () => {
       setInputText(text);
       setHasProcessed(false);
       setOutputText('');
-      setFileName(null);
     }
   };
 
   /**
-   * Load from history (Feature 6)
+   * Load from history
    */
-  const handleLoadHistory = (entry: Base64HistoryEntry) => {
+  const handleLoadHistory = (entry: JsonHistoryEntry) => {
     setInputText(entry.input);
-    setOperation(entry.operation);
-    setUrlSafe(entry.urlSafe || false);
+    setIndentSize(entry.options?.indentSize || 2);
+    setSortKeys(entry.options?.sortKeys || false);
+    setEscapeUnicode(entry.options?.escapeUnicode || false);
     setShowHistory(false);
   };
 
   /**
-   * Clear history (Feature 6)
+   * Clear history
    */
   const handleClearHistory = () => {
     Alert.alert(
@@ -298,94 +268,63 @@ export const Base64EncoderScreen: React.FC = () => {
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <Text style={[styles.title, { color: colors.text }]}>
-                Base64 Encoder/Decoder
+                JSON Formatter
               </Text>
               <InfoButton onPress={() => setShowInfoPopup(true)} />
             </View>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Advanced encoding with smart features
+              Format, validate & minify JSON
             </Text>
           </View>
 
-          {/* Auto-detection warning (Feature 3) */}
-          {isLikelyBase64 && operation === 'encode' && (
-            <View style={[styles.warningBanner, { backgroundColor: '#F59E0B15', borderColor: '#F59E0B' }]}>
-              <AlertTriangle size={18} color="#F59E0B" style={styles.warningIcon} />
-              <Text style={[styles.warningText, { color: '#F59E0B' }]}>
-                Input looks like Base64. Switch to decode?
-              </Text>
-              <TouchableOpacity onPress={() => setOperation('decode')}>
-                <Text style={[styles.warningAction, { color: '#F59E0B' }]}>Switch</Text>
-              </TouchableOpacity>
+          {/* Validation Status */}
+          {inputText && validation && (
+            <View style={[
+              styles.statusBanner,
+              {
+                backgroundColor: validation.valid ? '#10B98115' : '#EF444415',
+                borderColor: validation.valid ? '#10B981' : '#EF4444'
+              }
+            ]}>
+              {validation.valid ? (
+                <>
+                  <CheckCircle size={18} color="#10B981" style={styles.statusIcon} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.statusText, { color: '#10B981' }]}>
+                      Valid JSON {jsonInfo && `• ${jsonInfo.type}`}
+                      {jsonInfo?.keys && ` • ${jsonInfo.keys} keys`}
+                      {jsonInfo?.items && ` • ${jsonInfo.items} items`}
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle size={18} color="#EF4444" style={styles.statusIcon} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.statusText, { color: '#EF4444' }]}>
+                      Invalid JSON
+                    </Text>
+                    {validation.errorLine && (
+                      <Text style={[styles.errorDetail, { color: '#EF4444' }]}>
+                        Line {validation.errorLine}, Column {validation.errorColumn}
+                      </Text>
+                    )}
+                  </View>
+                </>
+              )}
             </View>
           )}
 
-          {/* Operation Tabs */}
-          <View style={styles.tabContainer}>
+          {/* Top Actions */}
+          <View style={styles.topActions}>
             <TouchableOpacity
-              style={[
-                styles.tab,
-                {
-                  backgroundColor: operation === 'encode' ? colors.primary : colors.card,
-                  borderColor: colors.border
-                }
-              ]}
-              onPress={() => {
-                setOperation('encode');
-                setHasProcessed(false);
-                setOutputText('');
-              }}
+              style={styles.optionsButton}
+              onPress={() => setShowOptions(true)}
             >
-              <Text style={[styles.tabText, { color: operation === 'encode' ? '#fff' : colors.text }]}>
-                Encode
-              </Text>
+              <Settings size={16} color={colors.primary} />
+              <Text style={[styles.optionsButtonText, { color: colors.primary }]}>Options</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.tab,
-                {
-                  backgroundColor: operation === 'decode' ? colors.primary : colors.card,
-                  borderColor: colors.border
-                }
-              ]}
-              onPress={() => {
-                setOperation('decode');
-                setHasProcessed(false);
-                setOutputText('');
-              }}
-            >
-              <Text style={[styles.tabText, { color: operation === 'decode' ? '#fff' : colors.text }]}>
-                Decode
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Options Row */}
-          <View style={styles.optionsRow}>
-            {/* URL-Safe Toggle (Feature 4) */}
-            <TouchableOpacity
-              style={styles.checkboxRow}
-              onPress={() => setUrlSafe(!urlSafe)}
-            >
-              <View style={[styles.checkbox, { borderColor: colors.border, backgroundColor: urlSafe ? colors.primary : 'transparent' }]}>
-                {urlSafe && <CheckCircle size={14} color="#fff" />}
-              </View>
-              <Text style={[styles.checkboxLabel, { color: colors.text }]}>URL-Safe</Text>
-            </TouchableOpacity>
-
-            {/* Batch Mode Toggle (Feature 5) */}
-            <TouchableOpacity
-              style={styles.checkboxRow}
-              onPress={() => setBatchMode(!batchMode)}
-            >
-              <View style={[styles.checkbox, { borderColor: colors.border, backgroundColor: batchMode ? colors.primary : 'transparent' }]}>
-                {batchMode && <CheckCircle size={14} color="#fff" />}
-              </View>
-              <Text style={[styles.checkboxLabel, { color: colors.text }]}>Batch Mode</Text>
-            </TouchableOpacity>
-
-            {/* History Button (Feature 6) */}
             {history.length > 0 && (
               <TouchableOpacity
                 style={styles.historyButton}
@@ -403,18 +342,15 @@ export const Base64EncoderScreen: React.FC = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Input {operation === 'encode' ? '(Plain Text)' : '(Base64)'}
-                {fileName && ` - ${fileName}`}
+                Input JSON
               </Text>
               <View style={styles.sectionActions}>
                 <TouchableOpacity onPress={handlePasteInput} style={styles.actionButton}>
                   <Text style={[styles.actionText, { color: colors.primary }]}>Paste</Text>
                 </TouchableOpacity>
-                {operation === 'encode' && (
-                  <TouchableOpacity onPress={handlePickFile} style={styles.actionButton}>
-                    <FileText size={16} color={colors.primary} />
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity onPress={handlePickFile} style={styles.actionButton}>
+                  <Text style={[styles.actionText, { color: colors.primary }]}>File</Text>
+                </TouchableOpacity>
               </View>
             </View>
             
@@ -422,7 +358,7 @@ export const Base64EncoderScreen: React.FC = () => {
               style={[styles.textArea, { 
                 backgroundColor: colors.card, 
                 color: colors.text,
-                borderColor: colors.border
+                borderColor: validation && !validation.valid ? '#EF4444' : colors.border
               }]}
               value={inputText}
               onChangeText={(text) => {
@@ -430,7 +366,7 @@ export const Base64EncoderScreen: React.FC = () => {
                 setHasProcessed(false);
                 setOutputText('');
               }}
-              placeholder={batchMode ? 'Enter multiple lines (one per line)...' : operation === 'encode' ? 'Enter text to encode...' : 'Enter Base64 to decode...'}
+              placeholder='Enter or paste JSON here...\n\n{\n  "example": "value"\n}'
               placeholderTextColor={colors.textSecondary}
               multiline
               textAlignVertical="top"
@@ -440,11 +376,11 @@ export const Base64EncoderScreen: React.FC = () => {
             
             <View style={styles.infoRow}>
               <Text style={[styles.charCount, { color: colors.textSecondary }]}>
-                {inputText.length} characters • {inputSize} bytes
+                {inputText.length} characters
               </Text>
-              {batchMode && inputText && (
-                <Text style={[styles.charCount, { color: colors.textSecondary }]}>
-                  {inputText.split('\n').filter(l => l.trim()).length} lines
+              {validation?.error && (
+                <Text style={[styles.errorText, { color: '#EF4444' }]} numberOfLines={1}>
+                  {validation.error}
                 </Text>
               )}
             </View>
@@ -453,19 +389,26 @@ export const Base64EncoderScreen: React.FC = () => {
           {/* Action Buttons */}
           <View style={styles.buttonRow}>
             <TouchableOpacity
-              style={[styles.processButton, { backgroundColor: colors.primary }]}
-              onPress={handleProcess}
+              style={[styles.actionBtn, { backgroundColor: colors.primary, opacity: validation?.valid ? 1 : 0.5 }]}
+              onPress={handleFormat}
+              disabled={!validation?.valid}
             >
-              <Text style={styles.processButtonText}>
-                {operation === 'encode' ? 'Encode' : 'Decode'}
-              </Text>
+              <Text style={styles.actionBtnText}>Format</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.switchButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={handleSwitchOperation}
+              style={[styles.actionBtn, { backgroundColor: colors.primary, opacity: validation?.valid ? 1 : 0.5 }]}
+              onPress={handleMinify}
+              disabled={!validation?.valid}
             >
-              <ArrowRightLeft size={20} color={colors.primary} />
+              <Text style={styles.actionBtnText}>Minify</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.validateBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+              onPress={handleValidate}
+            >
+              <Text style={[styles.validateBtnText, { color: colors.text }]}>Validate</Text>
             </TouchableOpacity>
 
             {(inputText || outputText) && (
@@ -484,7 +427,7 @@ export const Base64EncoderScreen: React.FC = () => {
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionHeaderLeft}>
                   <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                    Output {operation === 'encode' ? '(Base64)' : '(Plain Text)'}
+                    Output
                   </Text>
                   <CheckCircle size={16} color="#10B981" style={styles.successIcon} />
                 </View>
@@ -508,60 +451,11 @@ export const Base64EncoderScreen: React.FC = () => {
               
               <View style={styles.infoRow}>
                 <Text style={[styles.charCount, { color: colors.textSecondary }]}>
-                  {outputText.length} characters • {outputSize} bytes
+                  {outputText.length} characters
                 </Text>
-                {inputSize > 0 && (
-                  <Text style={[styles.charCount, { color: colors.textSecondary }]}>
-                    {sizeRatio}% of input size
-                  </Text>
-                )}
-              </View>
-
-              {/* Size Comparison Bar (Feature 7) */}
-              <View style={styles.sizeComparison}>
-                <View style={styles.sizeBarContainer}>
-                  <View
-                    style={[
-                      styles.sizeBar,
-                      {
-                        backgroundColor: operation === 'encode' ? '#EF4444' : '#10B981',
-                        width: '100%'
-                      }
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.sizeBar,
-                      {
-                        backgroundColor: operation === 'encode' ? '#10B981' : '#EF4444',
-                        width: `${Math.min(100, parseFloat(sizeRatio.toString()))}%`
-                      }
-                    ]}
-                  />
-                </View>
-                <Text style={[styles.sizeLabel, { color: colors.textSecondary }]}>
-                  Input vs Output
+                <Text style={[styles.charCount, { color: colors.textSecondary }]}>
+                  {((new Blob([outputText]).size / new Blob([inputText]).size) * 100).toFixed(0)}% of original
                 </Text>
-              </View>
-
-              {/* Quick Actions (Feature 8) */}
-              <View style={styles.quickActions}>
-                <TouchableOpacity
-                  style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                  onPress={handleCopyAndClear}
-                >
-                  <Text style={[styles.quickActionText, { color: colors.text }]}>Copy & Clear</Text>
-                </TouchableOpacity>
-                
-                {Platform.OS !== 'web' && (
-                  <TouchableOpacity
-                    style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                    onPress={handleShare}
-                  >
-                    <Share2 size={16} color={colors.text} style={{ marginRight: 4 }} />
-                    <Text style={[styles.quickActionText, { color: colors.text }]}>Share</Text>
-                  </TouchableOpacity>
-                )}
               </View>
             </View>
           )}
@@ -571,19 +465,110 @@ export const Base64EncoderScreen: React.FC = () => {
             <Info size={20} color={colors.primary} style={styles.infoIcon} />
             <View style={styles.infoTextContainer}>
               <Text style={[styles.infoTitle, { color: colors.text }]}>
-                {urlSafe ? 'URL-Safe Base64' : 'Standard Base64'}
+                Current Settings
               </Text>
               <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-                {urlSafe 
-                  ? 'Uses - and _ instead of + and /. No padding. Safe for URLs.' 
-                  : 'Standard Base64 encoding. Output is ~33% larger than input.'}
+                Indent: {indentSize} spaces • Sort keys: {sortKeys ? 'Yes' : 'No'} • Escape unicode: {escapeUnicode ? 'Yes' : 'No'}
               </Text>
             </View>
           </View>
         </View>
       </ScrollView>
 
-      {/* History Modal (Feature 6) */}
+      {/* Options Modal */}
+      <Modal
+        visible={showOptions}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowOptions(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowOptions(false)}
+        >
+          <View style={styles.optionsModal} onStartShouldSetResponder={() => true}>
+            <View style={[styles.optionsCard, { backgroundColor: colors.card }]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>Format Options</Text>
+                <TouchableOpacity onPress={() => setShowOptions(false)}>
+                  <X size={24} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.optionItem}>
+                <Text style={[styles.optionLabel, { color: colors.text }]}>Indentation</Text>
+                <View style={styles.segmentControl}>
+                  <TouchableOpacity
+                    style={[
+                      styles.segment,
+                      { 
+                        backgroundColor: indentSize === 2 ? colors.primary : colors.card,
+                        borderColor: colors.border 
+                      }
+                    ]}
+                    onPress={() => setIndentSize(2)}
+                  >
+                    <Text style={[styles.segmentText, { color: indentSize === 2 ? '#fff' : colors.text }]}>
+                      2 spaces
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.segment,
+                      { 
+                        backgroundColor: indentSize === 4 ? colors.primary : colors.card,
+                        borderColor: colors.border 
+                      }
+                    ]}
+                    onPress={() => setIndentSize(4)}
+                  >
+                    <Text style={[styles.segmentText, { color: indentSize === 4 ? '#fff' : colors.text }]}>
+                      4 spaces
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.optionItem}>
+                <View style={styles.optionRow}>
+                  <View>
+                    <Text style={[styles.optionLabel, { color: colors.text }]}>Sort Keys</Text>
+                    <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
+                      Sort object keys alphabetically
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.toggle, { backgroundColor: sortKeys ? colors.primary : colors.border }]}
+                    onPress={() => setSortKeys(!sortKeys)}
+                  >
+                    <View style={[styles.toggleThumb, { marginLeft: sortKeys ? 20 : 0 }]} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.optionItem}>
+                <View style={styles.optionRow}>
+                  <View>
+                    <Text style={[styles.optionLabel, { color: colors.text }]}>Escape Unicode</Text>
+                    <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
+                      Convert unicode to \uXXXX format
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.toggle, { backgroundColor: escapeUnicode ? colors.primary : colors.border }]}
+                    onPress={() => setEscapeUnicode(!escapeUnicode)}
+                  >
+                    <View style={[styles.toggleThumb, { marginLeft: escapeUnicode ? 20 : 0 }]} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* History Modal */}
       <Modal
         visible={showHistory}
         transparent
@@ -597,10 +582,8 @@ export const Base64EncoderScreen: React.FC = () => {
         >
           <View style={styles.historyModal} onStartShouldSetResponder={() => true}>
             <View style={[styles.historyCard, { backgroundColor: colors.card }]}>
-              <View style={styles.historyHeader}>
-                <Text style={[styles.historyTitle, { color: colors.text }]}>
-                  Recent Conversions
-                </Text>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>Recent Operations</Text>
                 <View style={styles.historyActions}>
                   <TouchableOpacity onPress={handleClearHistory} style={{ marginRight: 12 }}>
                     <Trash2 size={20} color={colors.textSecondary} />
@@ -621,7 +604,6 @@ export const Base64EncoderScreen: React.FC = () => {
                     <View style={styles.historyItemHeader}>
                       <Text style={[styles.historyOperation, { color: colors.primary }]}>
                         {entry.operation.toUpperCase()}
-                        {entry.urlSafe && ' (URL-Safe)'}
                       </Text>
                       <Text style={[styles.historyTime, { color: colors.textSecondary }]}>
                         {new Date(entry.timestamp).toLocaleTimeString()}
@@ -654,7 +636,7 @@ export const Base64EncoderScreen: React.FC = () => {
             <View style={[styles.modalCard, { backgroundColor: colors.card }]}>
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>
-                  {BASE64_INFO.title}
+                  {JSON_INFO.title}
                 </Text>
                 <TouchableOpacity onPress={() => setShowInfoPopup(false)}>
                   <X size={24} color={colors.text} />
@@ -663,13 +645,13 @@ export const Base64EncoderScreen: React.FC = () => {
               
               <ScrollView style={styles.modalScroll}>
                 <Text style={[styles.modalDescription, { color: colors.textSecondary }]}>
-                  {BASE64_INFO.description}
+                  {JSON_INFO.description}
                 </Text>
                 
                 <Text style={[styles.modalSectionTitle, { color: colors.text }]}>
                   Common Use Cases
                 </Text>
-                {BASE64_INFO.useCases.map((useCase, index) => (
+                {JSON_INFO.useCases.map((useCase, index) => (
                   <View key={index} style={styles.useCaseItem}>
                     <Text style={[styles.useCaseTitle, { color: colors.text }]}>
                       • {useCase.title}
@@ -681,9 +663,9 @@ export const Base64EncoderScreen: React.FC = () => {
                 ))}
                 
                 <Text style={[styles.modalSectionTitle, { color: colors.text }]}>
-                  {BASE64_INFO.technicalDetails.title}
+                  {JSON_INFO.technicalDetails.title}
                 </Text>
-                {BASE64_INFO.technicalDetails.points.map((point, index) => (
+                {JSON_INFO.technicalDetails.points.map((point, index) => (
                   <Text key={index} style={[styles.technicalPoint, { color: colors.textSecondary }]}>
                     • {point}
                   </Text>
@@ -714,65 +696,40 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16
   },
-  warningBanner: {
+  statusBanner: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
     marginBottom: 12
   },
-  warningIcon: {
-    marginRight: 8
+  statusIcon: {
+    marginRight: 8,
+    marginTop: 2
   },
-  warningText: {
-    flex: 1,
+  statusText: {
     fontSize: 14,
-    fontWeight: '500'
-  },
-  warningAction: {
-    fontSize: 14,
-    fontWeight: '600',
-    textDecorationLine: 'underline'
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16
-  },
-  tab: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center'
-  },
-  tabText: {
-    fontSize: 15,
     fontWeight: '600'
   },
-  optionsRow: {
+  errorDetail: {
+    fontSize: 12,
+    marginTop: 2
+  },
+  topActions: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
-    gap: 16
+    gap: 12
   },
-  checkboxRow: {
+  optionsButton: {
     flexDirection: 'row',
-    alignItems: 'center'
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    marginRight: 8,
     alignItems: 'center',
-    justifyContent: 'center'
+    gap: 4
   },
-  checkboxLabel: {
+  optionsButtonText: {
     fontSize: 14,
-    fontWeight: '500'
+    fontWeight: '600'
   },
   historyButton: {
     flexDirection: 'row',
@@ -824,40 +781,49 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
-    minHeight: 120,
+    minHeight: 180,
     fontFamily: 'monospace'
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 4
+    marginTop: 4,
+    gap: 8
   },
   charCount: {
     fontSize: 12
+  },
+  errorText: {
+    fontSize: 12,
+    flex: 1,
+    textAlign: 'right'
   },
   buttonRow: {
     flexDirection: 'row',
     gap: 8,
     marginBottom: 20
   },
-  processButton: {
+  actionBtn: {
     flex: 1,
     padding: 14,
     borderRadius: 8,
     alignItems: 'center'
   },
-  processButtonText: {
+  actionBtnText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600'
   },
-  switchButton: {
+  validateBtn: {
+    flex: 1,
     padding: 14,
     borderRadius: 8,
     borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 50
+    alignItems: 'center'
+  },
+  validateBtnText: {
+    fontSize: 16,
+    fontWeight: '600'
   },
   clearButton: {
     paddingHorizontal: 16,
@@ -871,51 +837,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
-    maxHeight: 200
+    maxHeight: 300
   },
   outputText: {
     fontSize: 14,
     fontFamily: 'monospace',
     lineHeight: 20
-  },
-  sizeComparison: {
-    marginTop: 12
-  },
-  sizeBarContainer: {
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-    backgroundColor: '#E5E7EB',
-    position: 'relative'
-  },
-  sizeBar: {
-    height: '100%',
-    position: 'absolute',
-    left: 0,
-    top: 0
-  },
-  sizeLabel: {
-    fontSize: 11,
-    marginTop: 4,
-    textAlign: 'center'
-  },
-  quickActions: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12
-  },
-  quickActionButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center'
-  },
-  quickActionText: {
-    fontSize: 14,
-    fontWeight: '600'
   },
   infoCard: {
     flexDirection: 'row',
@@ -1001,6 +928,64 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 6
   },
+  optionsModal: {
+    width: '90%',
+    maxHeight: '70%'
+  },
+  optionsCard: {
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8
+  },
+  optionItem: {
+    marginBottom: 20
+  },
+  optionLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8
+  },
+  optionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  optionDescription: {
+    fontSize: 13,
+    marginTop: 2
+  },
+  segmentControl: {
+    flexDirection: 'row',
+    gap: 8
+  },
+  segment: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center'
+  },
+  segmentText: {
+    fontSize: 14,
+    fontWeight: '600'
+  },
+  toggle: {
+    width: 44,
+    height: 24,
+    borderRadius: 12,
+    padding: 2,
+    justifyContent: 'center'
+  },
+  toggleThumb: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#fff'
+  },
   historyModal: {
     width: '90%',
     maxHeight: '70%'
@@ -1013,16 +998,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8
-  },
-  historyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16
-  },
-  historyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold'
   },
   historyActions: {
     flexDirection: 'row',

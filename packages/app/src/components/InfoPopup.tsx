@@ -11,7 +11,7 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from '../theme';
-import { UUIDVersionMetadata } from '../tools/uuid-generator/metadata';
+import { UUIDVersionMetadata } from '@human-utils/cli';
 
 interface InfoPopupProps {
   visible: boolean;

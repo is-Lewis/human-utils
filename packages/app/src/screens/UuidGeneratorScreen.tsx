@@ -14,9 +14,16 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert 
 import { ChevronDown, ChevronRight, Dice5, Database, RefreshCw, Clock, CheckCircle, XCircle } from 'lucide-react-native';
 import { Container, InfoButton, InfoPopup } from '../components';
 import { useTheme } from '../theme';
-import { UUIDVersion, UUID_NAMESPACES } from '../tools/uuid-generator/types';
-import { UUID_VERSION_METADATA, HELP_ME_CHOOSE_GUIDE, UUIDVersionMetadata } from '../tools/uuid-generator/metadata';
-import { generateUUID, generateV5, isValidUUID } from '../tools/uuid-generator';
+import { 
+  UUIDVersion, 
+  UUID_NAMESPACES, 
+  UUID_VERSION_METADATA, 
+  HELP_ME_CHOOSE_GUIDE, 
+  UUIDVersionMetadata,
+  generateUUID, 
+  generateV5, 
+  isValidUUID 
+} from '@human-utils/cli';
 import * as Clipboard from 'expo-clipboard';
 
 export const UuidGeneratorScreen: React.FC = () => {

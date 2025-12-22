@@ -8,7 +8,7 @@
  */
 
 import { Command } from 'commander';
-import { generateWords, generateSentences, generateParagraphs } from '../../src/tools/lorem-ipsum';
+import { generateWords, generateSentences, generateParagraphs } from '../../lorem-ipsum';
 import * as fs from 'fs';
 import * as path from 'path';
 
