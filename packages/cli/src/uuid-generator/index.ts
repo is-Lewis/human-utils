@@ -11,7 +11,7 @@
 import { UUIDVersion, UUID_NAMESPACES } from './types';
 
 // Re-export types and constants
-export type { UUIDVersion, UUIDInfo } from './types';
+export type { UUIDVersion } from './types';
 export { UUID_NAMESPACES };
 
 /**

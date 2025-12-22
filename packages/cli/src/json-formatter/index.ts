@@ -13,8 +13,7 @@ export type {
   JsonValidationResult, 
   JsonFormatResult, 
   JsonOperation, 
-  JsonHistoryEntry,
-  JsonInfo 
+  JsonHistoryEntry
 } from './types';
 
 /**
