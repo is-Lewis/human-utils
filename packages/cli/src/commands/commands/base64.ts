@@ -8,7 +8,7 @@
  */
 
 import { Command } from 'commander';
-import { encodeToBase64, decodeFromBase64, isValidBase64 } from '../../src/tools/base64-encoder';
+import { encodeToBase64, decodeFromBase64, isValidBase64 } from '../../base64-encoder';
 import * as fs from 'fs';
 import * as path from 'path';
 

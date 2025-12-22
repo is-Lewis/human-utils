@@ -1,0 +1,38 @@
+{
+  "name": "@human-utils/cli",
+  "version": "1.0.0",
+  "description": "Command-line utilities for developers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "hu": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "hu": "tsx src/cli.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "uuid",
+    "base64",
+    "json",
+    "lorem-ipsum",
+    "cli",
+    "utilities",
+    "developer-tools"
+  ],
+  "author": "Lewis Goodwin <https://github.com/is-Lewis>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^14.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.2",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.2"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

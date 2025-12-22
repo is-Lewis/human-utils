@@ -18,9 +18,11 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal } fr
 import { Copy, Info, X, RefreshCw, Type, FileText, List } from 'lucide-react-native';
 import { Container, InfoButton } from '../components';
 import { useTheme } from '../theme';
-import { LoremUnit } from '../tools/lorem-ipsum/types';
-import { LOREM_INFO } from '../tools/lorem-ipsum/metadata';
-import { generateLorem } from '../tools/lorem-ipsum';
+import { 
+  LoremUnit,
+  LOREM_INFO,
+  generateLorem 
+} from '@human-utils/cli';
 import * as Clipboard from 'expo-clipboard';
 import Slider from '@react-native-community/slider';
 

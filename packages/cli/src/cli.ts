@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env node
 
 /**
  * HumanUtils CLI Entry Point
@@ -11,10 +11,10 @@
  */
 
 import { Command } from 'commander';
-import { uuidCommand } from './commands/uuid';
-import { base64Command } from './commands/base64';
-import { jsonCommand } from './commands/json';
-import { loremCommand } from './commands/lorem';
+import { uuidCommand } from './commands/commands/uuid';
+import { base64Command } from './commands/commands/base64';
+import { jsonCommand } from './commands/commands/json';
+import { loremCommand } from './commands/commands/lorem';
 
 const program = new Command();
 

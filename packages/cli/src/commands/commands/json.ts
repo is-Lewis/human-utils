@@ -8,7 +8,7 @@
  */
 
 import { Command } from 'commander';
-import { formatJson, minifyJson, validateJson } from '../../src/tools/json-formatter';
+import { formatJson, minifyJson, validateJson } from '../../json-formatter';
 import * as fs from 'fs';
 import * as path from 'path';
 

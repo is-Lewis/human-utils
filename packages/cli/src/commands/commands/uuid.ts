@@ -8,8 +8,8 @@
  */
 
 import { Command } from 'commander';
-import { generateUUID, generateMultiple, generateV5, isValidUUID } from '../../src/tools/uuid-generator';
-import { UUID_NAMESPACES } from '../../src/tools/uuid-generator/types';
+import { generateUUID, generateMultiple, generateV5, isValidUUID } from '../../uuid-generator';
+import { UUID_NAMESPACES } from '../../uuid-generator/types';
 
 export const uuidCommand = new Command('uuid')
   .description('UUID generation and validation utilities');
