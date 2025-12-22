@@ -7,12 +7,26 @@
   ],
   "scripts": {
     "cli": "npm run hu --workspace=@human-utils/cli",
+    "cli:build": "npm run build --workspace=@human-utils/cli",
     "app:start": "npm run start --workspace=@human-utils/app",
     "app:android": "npm run android --workspace=@human-utils/app",
     "app:ios": "npm run ios --workspace=@human-utils/app",
-    "app:web": "npm run web --workspace=@human-utils/app"
+    "app:web": "npm run web --workspace=@human-utils/app",
+    "lint": "eslint packages --ext .ts,.tsx",
+    "lint:fix": "eslint packages --ext .ts,.tsx --fix",
+    "format": "prettier --write \"packages/**/*.{ts,tsx,json}\"",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-native": "^4.1.0",
+    "prettier": "^3.0.0",
     "typescript": "~5.9.2"
   }
 }

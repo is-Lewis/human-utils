@@ -1,7 +1,7 @@
 {
   "name": "@human-utils/cli",
   "version": "1.0.0",
-  "description": "Command-line utilities for developers",
+  "description": "Everyday utilities for everyone - Command-line tools for UUID generation, Base64 encoding, JSON formatting, and more",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -10,6 +10,9 @@
   "scripts": {
     "build": "tsc",
     "hu": "tsx src/cli.ts",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -19,15 +22,36 @@
     "lorem-ipsum",
     "cli",
     "utilities",
-    "developer-tools"
+    "developer-tools",
+    "uuid-generator",
+    "json-formatter",
+    "base64-encoder"
   ],
   "author": "Lewis Goodwin <https://github.com/is-Lewis>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/is-Lewis/human-utils"
+  },
+  "bugs": {
+    "url": "https://github.com/is-Lewis/human-utils/issues"
+  },
+  "homepage": "https://github.com/is-Lewis/human-utils#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "dependencies": {
     "commander": "^14.0.2"
   },
   "devDependencies": {
     "@types/node": "^25.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0",
     "tsx": "^4.21.0",
     "typescript": "~5.9.2"
   },

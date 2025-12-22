@@ -1,0 +1,10 @@
+# Prettier ignore file
+node_modules
+dist
+build
+coverage
+.expo
+.vscode
+*.log
+package-lock.json
+yarn.lock

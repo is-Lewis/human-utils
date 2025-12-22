@@ -14,7 +14,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { Copy, Info, X, RefreshCw, Type, FileText, List } from 'lucide-react-native';
 import { Container, InfoButton } from '../components';
 import { useTheme } from '../theme';
@@ -23,11 +23,14 @@ import {
   LOREM_INFO,
   generateLorem 
 } from '@human-utils/cli';
-import * as Clipboard from 'expo-clipboard';
+import { useClipboard } from '../hooks';
+import { LIMITS, SUCCESS_MESSAGES } from '../constants/limits';
+import { Logger } from '../services/Logger';
 import Slider from '@react-native-community/slider';
 
 export const LoremIpsumScreen: React.FC = () => {
   const { colors, spacing } = useTheme();
+  const { copy } = useClipboard();
   
   // State
   const [unit, setUnit] = useState<LoremUnit>('paragraphs');
@@ -39,37 +42,48 @@ export const LoremIpsumScreen: React.FC = () => {
 
   // Generate lorem ipsum
   const result = useMemo(() => {
-    return generateLorem({
+    const timer = Logger.startTimer('Lorem generation');
+    const generated = generateLorem({
       count,
       unit,
       startWithLorem,
       htmlParagraphs: unit === 'paragraphs' && htmlParagraphs
     });
+    timer();
+    return generated;
   }, [count, unit, startWithLorem, htmlParagraphs, refreshKey]);
 
-  // Get max count based on unit
-  const maxCount = unit === 'words' ? 500 : unit === 'sentences' ? 50 : 10;
-  const minCount = 1;
+  // Get max count based on unit using constants
+  const maxCount = unit === 'words' ? LIMITS.LOREM.MAX_WORDS 
+    : unit === 'sentences' ? LIMITS.LOREM.MAX_SENTENCES 
+    : LIMITS.LOREM.MAX_PARAGRAPHS;
+  const minCount = LIMITS.LOREM.MIN_COUNT;
 
   /**
-   * Copy to clipboard
+   * Copy to clipboard using reusable hook
    */
   const handleCopy = async () => {
-    await Clipboard.setStringAsync(result.text);
-    Alert.alert('Copied', 'Lorem ipsum text copied to clipboard');
+    Logger.logUserAction('lorem_copy', { 
+      unit, 
+      count, 
+      wordCount: result.wordCount 
+    });
+    await copy(result.text, SUCCESS_MESSAGES.COPIED);
   };
 
   /**
    * Regenerate text
    */
   const handleRegenerate = () => {
+    Logger.logUserAction('lorem_regenerate', { unit, count });
     setRefreshKey(prev => prev + 1);
   };
 
   /**
    * Quick preset buttons
    */
-  const applyPreset = (newUnit: LoremUnit, newCount: number) => {
+  const handleApplyPreset = (newUnit: LoremUnit, newCount: number) => {
+    Logger.logUserAction('lorem_preset', { unit: newUnit, count: newCount });
     setUnit(newUnit);
     setCount(newCount);
   };
@@ -174,25 +188,33 @@ export const LoremIpsumScreen: React.FC = () => {
             <View style={styles.presetButtons}>
               <TouchableOpacity
                 style={[styles.presetButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => applyPreset('words', 50)}
+                onPress={() => handleApplyPreset('words', 50)}
+                accessibilityLabel="Apply 50 words preset"
+                accessibilityRole="button"
               >
                 <Text style={[styles.presetText, { color: colors.text }]}>50 Words</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.presetButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => applyPreset('words', 150)}
+                onPress={() => handleApplyPreset('words', 150)}
+                accessibilityLabel="Apply 150 words preset"
+                accessibilityRole="button"
               >
                 <Text style={[styles.presetText, { color: colors.text }]}>150 Words</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.presetButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => applyPreset('sentences', 5)}
+                onPress={() => handleApplyPreset('sentences', 5)}
+                accessibilityLabel="Apply 5 sentences preset"
+                accessibilityRole="button"
               >
                 <Text style={[styles.presetText, { color: colors.text }]}>5 Sentences</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.presetButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => applyPreset('paragraphs', 3)}
+                onPress={() => handleApplyPreset('paragraphs', 3)}
+                accessibilityLabel="Apply 3 paragraphs preset"
+                accessibilityRole="button"
               >
                 <Text style={[styles.presetText, { color: colors.text }]}>3 Paragraphs</Text>
               </TouchableOpacity>
@@ -237,10 +259,20 @@ export const LoremIpsumScreen: React.FC = () => {
                 Generated Text
               </Text>
               <View style={styles.outputActions}>
-                <TouchableOpacity onPress={handleRegenerate} style={styles.actionButton}>
+                <TouchableOpacity 
+                  onPress={handleRegenerate} 
+                  style={styles.actionButton}
+                  accessibilityLabel="Regenerate lorem ipsum text"
+                  accessibilityRole="button"
+                >
                   <RefreshCw size={18} color={colors.primary} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleCopy} style={styles.actionButton}>
+                <TouchableOpacity 
+                  onPress={handleCopy} 
+                  style={styles.actionButton}
+                  accessibilityLabel="Copy generated text to clipboard"
+                  accessibilityRole="button"
+                >
                   <Copy size={18} color={colors.primary} />
                 </TouchableOpacity>
               </View>
