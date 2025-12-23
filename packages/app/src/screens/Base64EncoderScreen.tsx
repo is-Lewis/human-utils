@@ -22,7 +22,6 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Alert,
   Modal,
   Platform,
 } from 'react-native';
@@ -54,7 +53,8 @@ import {
 import { useClipboard, useHistory } from '../hooks';
 import { FileService } from '../services/FileService';
 import { Logger } from '../services/Logger';
-import { LIMITS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/limits';
+import { showError, showInfo, showSuccess } from '../utils';
+import { LIMITS } from '../constants/limits';
 
 export const Base64EncoderScreen: React.FC = () => {
   const { colors, spacing } = useTheme();
@@ -91,7 +91,7 @@ export const Base64EncoderScreen: React.FC = () => {
    */
   const handleProcess = () => {
     if (!inputText.trim()) {
-      Alert.alert('Input Required', ERROR_MESSAGES.INPUT_REQUIRED('text'));
+      showError('Please enter text to process');
       return;
     }
 
@@ -104,9 +104,9 @@ export const Base64EncoderScreen: React.FC = () => {
         const lines = inputText.split('\n').filter((line) => line.trim());
 
         if (lines.length > LIMITS.BASE64.MAX_BATCH_LINES) {
-          Alert.alert(
-            'Too Many Lines',
-            `Batch processing limited to ${LIMITS.BASE64.MAX_BATCH_LINES} lines. Currently: ${lines.length}`
+          showError(
+            `Batch processing limited to ${LIMITS.BASE64.MAX_BATCH_LINES} lines. Currently: ${lines.length}`,
+            { context: { linesCount: lines.length, maxLines: LIMITS.BASE64.MAX_BATCH_LINES } }
           );
           return;
         }
@@ -117,7 +117,7 @@ export const Base64EncoderScreen: React.FC = () => {
 
         const failedCount = results.filter((r) => !r.success).length;
         if (failedCount > 0) {
-          Alert.alert('Batch Complete', `Processed ${results.length} lines\n${failedCount} failed`);
+          showInfo(`Processed ${results.length} lines\n${failedCount} failed`, true);
         }
 
         Logger.info('Batch Base64 processing completed', {
@@ -130,8 +130,7 @@ export const Base64EncoderScreen: React.FC = () => {
           result = encodeToBase64(inputText, { urlSafe });
         } else {
           if (!isValidBase64(inputText.trim())) {
-            Alert.alert('Invalid Base64', ERROR_MESSAGES.BASE64_INVALID_FORMAT);
-            Logger.warn('Invalid Base64 input', { inputLength: inputText.length });
+            showError('Invalid Base64 format', { context: { inputLength: inputText.length } });
             return;
           }
           result = decodeFromBase64(inputText);
@@ -157,7 +156,10 @@ export const Base64EncoderScreen: React.FC = () => {
       });
     } catch (error) {
       Logger.error('Base64 processing failed', error);
-      Alert.alert('Error', error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR);
+      showError(
+        error instanceof Error ? error.message : 'An unknown error occurred',
+        { context: { operation, batchMode } }
+      );
     } finally {
       timer();
     }
@@ -189,7 +191,7 @@ export const Base64EncoderScreen: React.FC = () => {
    */
   const handleDownload = async () => {
     if (!outputText) {
-      Alert.alert('No Output', ERROR_MESSAGES.INPUT_REQUIRED('output'));
+      showError('Please enter output first');
       return;
     }
 
@@ -235,7 +237,7 @@ export const Base64EncoderScreen: React.FC = () => {
    */
   const handleCopyOutput = async () => {
     if (!outputText) return;
-    await copy(outputText, SUCCESS_MESSAGES.COPIED);
+    await copy(outputText, 'Copied to clipboard');
     Logger.logUserAction('base64_copy', { size: outputSize });
   };
 

@@ -22,7 +22,6 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Alert,
   Modal,
 } from 'react-native';
 import {
@@ -49,7 +48,8 @@ import {
 import { useClipboard, useHistory, useDebounce } from '../hooks';
 import { FileService } from '../services/FileService';
 import { Logger } from '../services/Logger';
-import { LIMITS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/limits';
+import { showError, showInfo, showSuccess } from '../utils';
+import { LIMITS } from '../constants/limits';
 
 export const JsonFormatterScreen: React.FC = () => {
   const { colors, spacing } = useTheme();
@@ -91,7 +91,7 @@ export const JsonFormatterScreen: React.FC = () => {
    */
   const handleFormat = () => {
     if (!inputText.trim()) {
-      Alert.alert('Input Required', ERROR_MESSAGES.INPUT_REQUIRED('JSON'));
+      showError('Please enter JSON to process');
       return;
     }
 
@@ -100,8 +100,9 @@ export const JsonFormatterScreen: React.FC = () => {
     timer();
 
     if (!result.success) {
-      Logger.warn('JSON format failed', { error: result.error });
-      Alert.alert('Invalid JSON', result.error || ERROR_MESSAGES.JSON_FORMAT_FAILED);
+      showError(result.error || 'Failed to format JSON', {
+        context: { indentSize, sortKeys, escapeUnicode },
+      });
       return;
     }
 
@@ -127,7 +128,7 @@ export const JsonFormatterScreen: React.FC = () => {
    */
   const handleMinify = () => {
     if (!inputText.trim()) {
-      Alert.alert('Input Required', ERROR_MESSAGES.INPUT_REQUIRED('JSON'));
+      showError('Please enter JSON to process');
       return;
     }
 
@@ -136,8 +137,7 @@ export const JsonFormatterScreen: React.FC = () => {
     timer();
 
     if (!result.success) {
-      Logger.warn('JSON minify failed', { error: result.error });
-      Alert.alert('Invalid JSON', result.error || ERROR_MESSAGES.JSON_MINIFY_FAILED);
+      showError(result.error || 'Failed to minify JSON');
       return;
     }
 
@@ -160,7 +160,7 @@ export const JsonFormatterScreen: React.FC = () => {
    */
   const handleValidate = () => {
     if (!inputText.trim()) {
-      Alert.alert('Input Required', ERROR_MESSAGES.INPUT_REQUIRED('JSON'));
+      showError('Please enter JSON to process');
       return;
     }
 
@@ -168,12 +168,12 @@ export const JsonFormatterScreen: React.FC = () => {
     const result = validateJson(inputText);
 
     if (result.valid) {
-      Alert.alert('✓ Valid JSON', SUCCESS_MESSAGES.JSON_VALID);
+      showInfo('The JSON syntax is correct');
     } else {
       const message = result.errorLine
         ? `${result.error}\n\nLine: ${result.errorLine}, Column: ${result.errorColumn}`
         : result.error;
-      Alert.alert('✗ Invalid JSON', message);
+      showError(message || 'Invalid JSON');
     }
   };
 
@@ -198,7 +198,7 @@ export const JsonFormatterScreen: React.FC = () => {
       Logger.info('JSON file loaded', { size: result.content.length });
     } catch (error) {
       Logger.error('Failed to pick JSON file', error as Error);
-      Alert.alert('Error', ERROR_MESSAGES.FILE_LOAD_FAILED);
+      showError('Failed to load file');
     }
   };
 
@@ -207,7 +207,7 @@ export const JsonFormatterScreen: React.FC = () => {
    */
   const handleDownload = async () => {
     if (!outputText) {
-      Alert.alert('No Output', ERROR_MESSAGES.OUTPUT_REQUIRED('format or minify JSON'));
+      showError('Please format or minify JSON first');
       return;
     }
 
@@ -224,7 +224,7 @@ export const JsonFormatterScreen: React.FC = () => {
       timer();
     } catch (error) {
       Logger.error('Failed to download JSON', error as Error);
-      Alert.alert('Error', ERROR_MESSAGES.DOWNLOAD_FAILED);
+      showError('Failed to download file');
     }
   };
 
@@ -242,7 +242,7 @@ export const JsonFormatterScreen: React.FC = () => {
    */
   const handleCopyOutput = async () => {
     if (!outputText) return;
-    await copy(outputText, SUCCESS_MESSAGES.OUTPUT_COPIED);
+    await copy(outputText, 'Output copied to clipboard');
     Logger.logUserAction('json_copy_output', { length: outputText.length });
   };
 

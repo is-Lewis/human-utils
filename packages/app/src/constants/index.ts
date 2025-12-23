@@ -12,6 +12,7 @@ import {
   Binary,
   Braces,
   FileText,
+  CaseSensitive,
 } from 'lucide-react-native';
 
 export const TOOL_CATEGORIES = [
@@ -57,5 +58,13 @@ export const TOOLS = [
     categories: ['text'],
     icon: FileText,
     route: 'LoremIpsum' as const,
+  },
+  {
+    id: 'case-converter',
+    title: 'Case Converter',
+    description: 'Convert text between camelCase, snake_case, kebab-case, and more',
+    categories: ['text', 'dev', 'converters'],
+    icon: CaseSensitive,
+    route: 'CaseConverter' as const,
   },
 ];

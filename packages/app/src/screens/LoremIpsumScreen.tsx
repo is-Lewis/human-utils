@@ -20,7 +20,7 @@ import { Container, InfoButton } from '../components';
 import { useTheme } from '../theme';
 import { LoremUnit, LOREM_INFO, generateLorem } from '@human-utils/cli';
 import { useClipboard } from '../hooks';
-import { LIMITS, SUCCESS_MESSAGES } from '../constants/limits';
+import { LIMITS } from '../constants/limits';
 import { Logger } from '../services/Logger';
 import Slider from '@react-native-community/slider';
 
@@ -69,7 +69,7 @@ export const LoremIpsumScreen: React.FC = () => {
       count,
       wordCount: result.wordCount,
     });
-    await copy(result.text, SUCCESS_MESSAGES.COPIED);
+    await copy(result.text, 'Copied to clipboard');
   };
 
   /**

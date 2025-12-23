@@ -17,7 +17,6 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Alert,
 } from 'react-native';
 import {
   ChevronDown,
@@ -43,7 +42,8 @@ import {
 } from '@human-utils/cli';
 import { useClipboard } from '../hooks';
 import { Logger } from '../services/Logger';
-import { LIMITS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/limits';
+import { showError, showInfo, showSuccess } from '../utils';
+import { LIMITS } from '../constants/limits';
 
 export const UuidGeneratorScreen: React.FC = () => {
   const { colors, spacing } = useTheme();
@@ -82,9 +82,9 @@ export const UuidGeneratorScreen: React.FC = () => {
       const numCount = parseInt(count, 10);
 
       if (isNaN(numCount) || numCount < 1 || numCount > LIMITS.UUID.MAX_GENERATE_APP) {
-        Alert.alert(
-          'Invalid Count',
-          ERROR_MESSAGES.UUID_INVALID_COUNT(LIMITS.UUID.MAX_GENERATE_APP)
+        showError(
+          `Please enter a number between 1 and ${LIMITS.UUID.MAX_GENERATE_APP}`,
+          { context: { count: numCount, max: LIMITS.UUID.MAX_GENERATE_APP } }
         );
         return;
       }
@@ -94,7 +94,7 @@ export const UuidGeneratorScreen: React.FC = () => {
       // Special handling for v5 (requires namespace and name)
       if (selectedVersion === 'v5') {
         if (!name.trim()) {
-          Alert.alert('Name Required', ERROR_MESSAGES.UUID_NAME_REQUIRED);
+          showError('Please enter a name for v5 UUID generation');
           return;
         }
 
@@ -124,9 +124,9 @@ export const UuidGeneratorScreen: React.FC = () => {
       timer();
     } catch (error) {
       Logger.error('Failed to generate UUID', error as Error, { version: selectedVersion });
-      Alert.alert(
-        'Error',
-        error instanceof Error ? error.message : ERROR_MESSAGES.UUID_GENERATE_FAILED
+      showError(
+        error instanceof Error ? error.message : 'Failed to generate UUID',
+        { context: { version: selectedVersion, count: parseInt(count, 10) } }
       );
     }
   };
@@ -137,7 +137,7 @@ export const UuidGeneratorScreen: React.FC = () => {
   const handleCopyAll = async () => {
     if (generatedUUIDs.length === 0) return;
 
-    await copy(generatedUUIDs.join('\n'), SUCCESS_MESSAGES.UUID_COPIED(generatedUUIDs.length));
+    await copy(generatedUUIDs.join('\n'), `${generatedUUIDs.length} UUID(s) copied to clipboard`);
 
     Logger.logUserAction('uuid_copy_all', { count: generatedUUIDs.length });
   };
@@ -146,7 +146,7 @@ export const UuidGeneratorScreen: React.FC = () => {
    * Copies a single UUID to clipboard
    */
   const handleCopySingle = async (uuid: string) => {
-    await copy(uuid, SUCCESS_MESSAGES.UUID_COPIED_SINGLE);
+    await copy(uuid, 'UUID copied to clipboard');
     Logger.logUserAction('uuid_copy_single', { version: selectedVersion });
   };
 
@@ -155,7 +155,7 @@ export const UuidGeneratorScreen: React.FC = () => {
    */
   const handleValidate = () => {
     if (!validateInput.trim()) {
-      Alert.alert('Input Required', ERROR_MESSAGES.INPUT_REQUIRED('UUID'));
+      showError('Please enter UUID to process');
       return;
     }
 

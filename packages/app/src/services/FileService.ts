@@ -8,10 +8,11 @@
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
-import { Platform, Alert, Share } from 'react-native';
+import { Platform, Share } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import { LIMITS, ERROR_MESSAGES } from '../constants/limits';
+import { LIMITS } from '../constants/limits';
 import { Logger } from './Logger';
+import { showError } from '../utils/errorHandler';
 
 export interface FileValidationOptions {
   maxSizeMB?: number;
@@ -40,7 +41,7 @@ class FileServiceClass {
     if (asset.size && asset.size > maxSizeBytes) {
       return {
         valid: false,
-        error: ERROR_MESSAGES.FILE_TOO_LARGE(maxSizeMB),
+        error: `Please select a file smaller than ${maxSizeMB}MB`,
       };
     }
 
@@ -49,7 +50,7 @@ class FileServiceClass {
       if (!options.allowedTypes.includes(asset.mimeType)) {
         return {
           valid: false,
-          error: ERROR_MESSAGES.FILE_INVALID_TYPE(options.allowedTypes),
+          error: `Invalid file type. Allowed types: ${options.allowedTypes.join(', ')}`,
         };
       }
     }
@@ -77,8 +78,7 @@ class FileServiceClass {
       // Validate file
       const validation = this.validateFile(asset, options);
       if (!validation.valid) {
-        Alert.alert('Invalid File', validation.error!);
-        Logger.warn('File validation failed', { error: validation.error });
+        showError(validation.error!, { context: { fileName: asset.name, fileSize: asset.size } });
         return null;
       }
 
@@ -99,7 +99,7 @@ class FileServiceClass {
       };
     } catch (error) {
       Logger.error('File pick failed', error);
-      Alert.alert('Error', ERROR_MESSAGES.FILE_LOAD_FAILED);
+      showError('Failed to load file');
       return null;
     }
   }
@@ -120,7 +120,7 @@ class FileServiceClass {
       }
     } catch (error) {
       Logger.error('File download failed', error);
-      Alert.alert('Error', ERROR_MESSAGES.FILE_SAVE_FAILED);
+      showError('Failed to save file');
       return false;
     }
   }

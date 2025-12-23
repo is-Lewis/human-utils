@@ -8,6 +8,9 @@
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
+// Shared utilities and types
+export * from './utils/types';
+
 // UUID Generator - re-export everything from the tool
 export * from './uuid-generator';
 export * from './uuid-generator/metadata';
@@ -23,3 +26,7 @@ export * from './json-formatter/metadata';
 // Lorem Ipsum Generator - re-export everything from the tool
 export * from './lorem-ipsum';
 export * from './lorem-ipsum/metadata';
+
+// Case Converter - re-export everything from the tool
+export * from './case-converter';
+export * from './case-converter/metadata';

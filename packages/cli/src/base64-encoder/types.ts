@@ -7,7 +7,7 @@
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
-import { HistoryEntry } from '../json-formatter/types';
+import { HistoryEntry } from '../utils/types';
 
 /**
  * Supported operations for Base64 tool

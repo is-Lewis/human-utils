@@ -7,31 +7,35 @@
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
-import { Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { SUCCESS_MESSAGES } from '../constants/limits';
 import { Logger } from '../services/Logger';
+import { showError, showSuccess } from '../utils';
 
 export const useClipboard = () => {
   /**
-   * Copies text to clipboard with success notification
+   * Copies text to clipboard with success notification.
+   *
+   * @param text - The text to copy to clipboard
+   * @param successMessage - Optional custom success message (defaults to 'Copied to clipboard')
    */
   const copy = async (
     text: string,
-    successMessage: string = SUCCESS_MESSAGES.COPIED
+    successMessage: string = 'Copied to clipboard'
   ): Promise<void> => {
     try {
       await Clipboard.setStringAsync(text);
-      Alert.alert('Copied', successMessage);
+      showSuccess(successMessage);
       Logger.debug('Clipboard copy successful', { length: text.length });
     } catch (error) {
       Logger.error('Clipboard copy failed', error);
-      Alert.alert('Error', 'Failed to copy to clipboard');
+      showError('Failed to copy to clipboard');
     }
   };
 
   /**
-   * Pastes text from clipboard
+   * Pastes text from clipboard.
+   *
+   * @returns The clipboard content as a string, or empty string on error
    */
   const paste = async (): Promise<string> => {
     try {
@@ -40,13 +44,15 @@ export const useClipboard = () => {
       return text;
     } catch (error) {
       Logger.error('Clipboard paste failed', error);
-      Alert.alert('Error', 'Failed to paste from clipboard');
+      showError('Failed to paste from clipboard');
       return '';
     }
   };
 
   /**
-   * Checks if clipboard has content
+   * Checks if clipboard has content.
+   *
+   * @returns True if clipboard contains text, false otherwise
    */
   const hasContent = async (): Promise<boolean> => {
     try {

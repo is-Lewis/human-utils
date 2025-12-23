@@ -1,13 +1,15 @@
 /**
  * Logger Service
  *
- * Centralized logging with environment-aware behavior.
+ * Centralised logging with environment-aware behaviour and Sentry integration.
  * In development: logs to console
- * In production: can integrate with error tracking services
+ * In production: sends errors to Sentry for monitoring
  *
  * @module services/Logger
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
+
+import * as Sentry from '@sentry/react-native';
 
 type _LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -19,6 +21,25 @@ class LoggerService {
   private isDevelopment = __DEV__;
 
   /**
+   * Initialises Sentry for production error tracking.
+   * Call this once at app startup.
+   *
+   * @param dsn - Your Sentry DSN from sentry.io project settings
+   */
+  init(dsn: string): void {
+    if (!this.isDevelopment && dsn) {
+      Sentry.init({
+        dsn,
+        // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+        // Adjust this value in production
+        tracesSampleRate: 0.2, // 20% of transactions
+        enableAutoSessionTracking: true,
+        sessionTrackingIntervalMillis: 30000, // 30 seconds
+      });
+    }
+  }
+
+  /**
    * Logs debug information (development only)
    */
   debug(message: string, context?: LogContext): void {
@@ -26,6 +47,7 @@ class LoggerService {
       // eslint-disable-next-line no-console
       console.log(`[DEBUG] ${message}`, context || '');
     }
+    // Debug logs not sent to Sentry (too noisy)
   }
 
   /**
@@ -36,6 +58,7 @@ class LoggerService {
       // eslint-disable-next-line no-console
       console.log(`[INFO] ${message}`, context || '');
     }
+    // Info logs not sent to Sentry (too noisy)
   }
 
   /**
@@ -43,10 +66,17 @@ class LoggerService {
    */
   warn(message: string, context?: LogContext): void {
     console.warn(`[WARN] ${message}`, context || '');
+    
+    if (!this.isDevelopment) {
+      Sentry.captureMessage(message, {
+        level: 'warning',
+        contexts: { custom: context },
+      });
+    }
   }
 
   /**
-   * Logs error messages with stack traces
+   * Logs error messages with stack traces and sends to Sentry in production
    */
   error(message: string, error?: Error | unknown, context?: LogContext): void {
     const errorInfo =
@@ -60,9 +90,18 @@ class LoggerService {
 
     console.error(`[ERROR] ${message}`, { ...errorInfo, ...context });
 
-    // In production, send to error tracking service (e.g., Sentry)
-    if (!this.isDevelopment && error instanceof Error) {
-      this.sendToErrorTracking(message, error, context);
+    // Send to Sentry in production
+    if (!this.isDevelopment) {
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          contexts: { custom: { message, ...context } },
+        });
+      } else {
+        Sentry.captureMessage(message, {
+          level: 'error',
+          contexts: { custom: { ...errorInfo, ...context } },
+        });
+      }
     }
   }
 
@@ -74,6 +113,7 @@ class LoggerService {
       // eslint-disable-next-line no-console
       console.log(`[PERF] ${label}: ${duration.toFixed(2)}ms`, context || '');
     }
+    // Performance logs not sent to Sentry (use Sentry's built-in performance monitoring instead)
   }
 
   /**
@@ -88,26 +128,23 @@ class LoggerService {
   }
 
   /**
-   * Sends error to external tracking service (placeholder)
-   * In production, integrate with Sentry, LogRocket, etc.
-   */
-  private sendToErrorTracking(message: string, error: Error, _context?: LogContext): void {
-    // TODO: Integrate with error tracking service
-    // Example: Sentry.captureException(error, { tags: context });
-    // eslint-disable-next-line no-console
-    console.error('Error tracking not configured:', message, error);
-  }
-
-  /**
-   * Logs user actions for analytics (optional)
+   * Logs user actions for analytics
    */
   logUserAction(action: string, properties?: LogContext): void {
     if (this.isDevelopment) {
       // eslint-disable-next-line no-console
       console.log(`[USER ACTION] ${action}`, properties || '');
     }
-    // TODO: Integrate with analytics service
-    // Example: analytics.track(action, properties);
+    
+    // Add breadcrumb for Sentry (helps with debugging errors)
+    if (!this.isDevelopment) {
+      Sentry.addBreadcrumb({
+        category: 'user-action',
+        message: action,
+        data: properties,
+        level: 'info',
+      });
+    }
   }
 }
 

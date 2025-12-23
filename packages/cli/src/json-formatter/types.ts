@@ -5,6 +5,8 @@
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
+import { HistoryEntry } from '../utils/types';
+
 /**
  * JSON formatting operation type
  */
@@ -59,15 +61,6 @@ export interface JsonFormatResult {
 
   /** Formatted size in bytes */
   formattedSize?: number;
-}
-
-/**
- * Base history entry interface
- */
-export interface HistoryEntry {
-  id: string;
-  timestamp: number;
-  [key: string]: unknown;
 }
 
 /**
