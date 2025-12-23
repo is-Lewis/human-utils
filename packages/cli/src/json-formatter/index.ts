@@ -14,6 +14,7 @@ export type {
   JsonFormatResult,
   JsonOperation,
   JsonHistoryEntry,
+  HistoryEntry,
 } from './types';
 
 /**

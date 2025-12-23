@@ -10,12 +10,7 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { LIMITS } from '../constants/limits';
-
-export interface HistoryEntry {
-  id: string;
-  timestamp: number;
-  [key: string]: unknown;
-}
+import type { HistoryEntry } from '@human-utils/cli';
 
 export const useHistory = <T extends HistoryEntry>(maxItems: number = LIMITS.HISTORY.MAX_ITEMS) => {
   const [history, setHistory] = useState<T[]>([]);

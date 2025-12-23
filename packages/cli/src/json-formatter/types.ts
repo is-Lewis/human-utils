@@ -62,12 +62,18 @@ export interface JsonFormatResult {
 }
 
 /**
+ * Base history entry interface
+ */
+export interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  [key: string]: unknown;
+}
+
+/**
  * JSON history entry
  */
-export interface JsonHistoryEntry {
-  /** Unique identifier */
-  id: string;
-
+export interface JsonHistoryEntry extends HistoryEntry {
   /** Operation performed */
   operation: JsonOperation;
 
@@ -76,9 +82,6 @@ export interface JsonHistoryEntry {
 
   /** Truncated output (first 100 chars) */
   output: string;
-
-  /** Timestamp of conversion */
-  timestamp: number;
 
   /** Formatting options used */
   options?: JsonFormatOptions;

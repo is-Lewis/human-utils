@@ -7,6 +7,8 @@
  * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
+import { HistoryEntry } from '../json-formatter/types';
+
 /**
  * Supported operations for Base64 tool
  */
@@ -41,17 +43,13 @@ export interface Base64Result {
 /**
  * History entry for Base64 conversions
  */
-export interface Base64HistoryEntry {
-  /** Unique ID for this entry */
-  id: string;
+export interface Base64HistoryEntry extends HistoryEntry {
   /** Operation performed */
   operation: Base64Operation;
   /** Input text */
   input: string;
   /** Output text */
   output: string;
-  /** Timestamp */
-  timestamp: number;
   /** Whether URL-safe encoding was used */
   urlSafe?: boolean;
 }
