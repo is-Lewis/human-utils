@@ -309,9 +309,9 @@ export const JsonFormatterScreen: React.FC = () => {
                   <CheckCircle size={18} color="#10B981" style={styles.statusIcon} />
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.statusText, { color: '#10B981' }]}>
-                      Valid JSON {jsonInfo && `• ${jsonInfo.type}`}
-                      {jsonInfo?.keys && ` • ${jsonInfo.keys} keys`}
-                      {jsonInfo?.items && ` • ${jsonInfo.items} items`}
+                      Valid JSON{jsonInfo ? ` • ${jsonInfo.type}` : ''}
+                      {jsonInfo?.keys ? ` • ${jsonInfo.keys} keys` : ''}
+                      {jsonInfo?.items ? ` • ${jsonInfo.items} items` : ''}
                     </Text>
                   </View>
                 </>
