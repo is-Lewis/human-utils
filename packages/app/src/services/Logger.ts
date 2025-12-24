@@ -18,7 +18,7 @@ interface LogContext {
 }
 
 class LoggerService {
-  private isDevelopment = __DEV__;
+  private isDevelopment = __DEV__ || process.env.NODE_ENV === 'development';
 
   /**
    * Initialises Sentry for production error tracking.

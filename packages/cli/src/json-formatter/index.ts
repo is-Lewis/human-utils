@@ -86,10 +86,11 @@ function sortKeysRecursive(obj: unknown): unknown {
   }
 
   const sorted: Record<string, unknown> = {};
-  Object.keys(obj)
+  const objRecord = obj as Record<string, unknown>;
+  Object.keys(objRecord)
     .sort()
     .forEach((key) => {
-      sorted[key] = sortKeysRecursive(obj[key]);
+      sorted[key] = sortKeysRecursive(objRecord[key]);
     });
 
   return sorted;

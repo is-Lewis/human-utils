@@ -13,6 +13,7 @@ import {
   Braces,
   FileText,
   CaseSensitive,
+  Link,
 } from 'lucide-react-native';
 
 export const TOOL_CATEGORIES = [
@@ -66,5 +67,13 @@ export const TOOLS = [
     categories: ['text', 'dev', 'converters'],
     icon: CaseSensitive,
     route: 'CaseConverter' as const,
+  },
+  {
+    id: 'url-encoder',
+    title: 'URL Encoder/Decoder',
+    description: 'Encode or decode URLs and URL components',
+    categories: ['network', 'dev', 'converters'],
+    icon: Link,
+    route: 'UrlEncoder' as const,
   },
 ];

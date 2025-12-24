@@ -7,6 +7,7 @@ import { Base64EncoderScreen } from '../screens/Base64EncoderScreen';
 import { JsonFormatterScreen } from '../screens/JsonFormatterScreen';
 import { LoremIpsumScreen } from '../screens/LoremIpsumScreen';
 import { CaseConverterScreen } from '../screens/CaseConverterScreen';
+import { UrlEncoderScreen } from '../screens/UrlEncoderScreen';
 import { CustomHeader } from './CustomHeader';
 
 export type RootStackParamList = {
@@ -16,6 +17,7 @@ export type RootStackParamList = {
   JsonFormatter: undefined;
   LoremIpsum: undefined;
   CaseConverter: undefined;
+  UrlEncoder: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -36,6 +38,7 @@ export const RootNavigator = () => {
         <Stack.Screen name="JsonFormatter" component={JsonFormatterScreen} />
         <Stack.Screen name="LoremIpsum" component={LoremIpsumScreen} />
         <Stack.Screen name="CaseConverter" component={CaseConverterScreen} />
+        <Stack.Screen name="UrlEncoder" component={UrlEncoderScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -4,3 +4,4 @@ export { Base64EncoderScreen } from './Base64EncoderScreen';
 export { JsonFormatterScreen } from './JsonFormatterScreen';
 export { LoremIpsumScreen } from './LoremIpsumScreen';
 export { CaseConverterScreen } from './CaseConverterScreen';
+export { UrlEncoderScreen } from './UrlEncoderScreen';

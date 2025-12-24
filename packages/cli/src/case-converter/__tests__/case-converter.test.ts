@@ -1,7 +1,11 @@
 /**
  * Case Converter Tests
+ * 
+ * This file contains unit tests for the Case Converter tool, it covers all case conversion functions
+ * and ensures that various input cases are correctly converted to the desired output formats.
  *
  * @module tools/case-converter/__tests__
+ * @author Lewis Goodwin <https://github.com/is-Lewis>
  */
 
 import {
@@ -68,6 +72,38 @@ describe('Case Converter', () => {
       const result = toConstantCase('helloWorldExample');
       expect(result.success).toBe(true);
       expect(result.output).toBe('HELLO_WORLD_EXAMPLE');
+    });
+  });
+
+  describe('toTitleCase', () => {
+    it('should convert to Title Case', () => {
+      const result = toTitleCase('helloWorldExample');
+      expect(result.success).toBe(true);
+      expect(result.output).toBe('Hello World Example');
+    });
+  });
+
+  describe('toSentenceCase', () => {
+    it('should convert to Sentence case', () => {
+      const result = toSentenceCase('helloWorldExample');
+      expect(result.success).toBe(true);
+      expect(result.output).toBe('Hello world example');
+    });
+  });
+
+  describe('toLowerCase', () => {
+    it('should convert to lowercase', () => {
+      const result = toLowerCase('helloWorldExample');
+      expect(result.success).toBe(true);
+      expect(result.output).toBe('helloworldexample');
+    });
+  });
+
+  describe('toUpperCase', () => {
+    it('should convert to UPPERCASE', () => {
+      const result = toUpperCase('helloWorldExample');
+      expect(result.success).toBe(true);
+      expect(result.output).toBe('HELLOWORLDEXAMPLE');
     });
   });
 

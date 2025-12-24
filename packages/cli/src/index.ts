@@ -30,3 +30,7 @@ export * from './lorem-ipsum/metadata';
 // Case Converter - re-export everything from the tool
 export * from './case-converter';
 export * from './case-converter/metadata';
+
+// URL Encoder - re-export everything from the tool
+export * from './url-encoder';
+export * from './url-encoder/metadata';
