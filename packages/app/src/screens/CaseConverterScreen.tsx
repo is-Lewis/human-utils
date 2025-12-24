@@ -293,14 +293,16 @@ export const CaseConverterScreen: React.FC = () => {
               <Picker
                 selectedValue={selectedCase}
                 onValueChange={(value) => setSelectedCase(value as CaseType)}
-                style={[styles.picker, { color: colors.text }]}
+                style={[styles.picker, { color: colors.text, backgroundColor: colors.card }]}
                 dropdownIconColor={colors.text}
+                itemStyle={{ color: colors.text }}
               >
                 {CASE_OPTIONS.map((option) => (
                   <Picker.Item
                     key={option.type}
                     label={`${option.label} (${option.example})`}
                     value={option.type}
+                    color={colors.text}
                   />
                 ))}
               </Picker>
@@ -623,6 +625,7 @@ const styles = StyleSheet.create({
   picker: {
     height: 54,
     fontSize: 16,
+    borderWidth: 0,
   },
   convertButton: {
     flexDirection: 'row',

@@ -9,7 +9,7 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet, Platform } from 'react-native';
 import { Sun, Moon, ArrowLeft } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackHeaderProps } from '@react-navigation/native-stack';
@@ -37,22 +37,29 @@ export const CustomHeader: React.FC<NativeStackHeaderProps> = () => {
       <View style={styles.content}>
         {/* Back Button (only on non-home screens) */}
         {!isHomeScreen && (
-          <TouchableOpacity
-            style={styles.backButton}
+          <Pressable
+            style={({ hovered }: any) => [
+              styles.backButton,
+              hovered && { backgroundColor: `${colors.primary}20` },
+            ]}
             onPress={() => navigation.goBack()}
             accessibilityLabel="Go back"
             accessibilityRole="button"
           >
             <ArrowLeft size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
         )}
 
         {/* Spacer to push theme toggle to the right */}
         {isHomeScreen && <View style={{ flex: 1 }} />}
 
         {/* Theme Toggle */}
-        <TouchableOpacity
-          style={[styles.themeButton, !isHomeScreen && styles.themeButtonWithBack]}
+        <Pressable
+          style={({ hovered }: any) => [
+            styles.themeButton,
+            !isHomeScreen && styles.themeButtonWithBack,
+            hovered && { backgroundColor: `${colors.primary}20` },
+          ]}
           onPress={toggleTheme}
           accessibilityLabel={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           accessibilityRole="button"
@@ -62,7 +69,7 @@ export const CustomHeader: React.FC<NativeStackHeaderProps> = () => {
           ) : (
             <Sun size={24} color={colors.text} />
           )}
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -80,11 +87,13 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     marginLeft: -8,
-    flex: 1,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
   },
   themeButton: {
     padding: 8,
     marginRight: -8,
+    borderRadius: 8,
   },
   themeButtonWithBack: {
     marginLeft: 'auto',
