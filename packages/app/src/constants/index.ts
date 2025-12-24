@@ -14,6 +14,7 @@ import {
   FileText,
   CaseSensitive,
   Link,
+  FileBarChart,
 } from 'lucide-react-native';
 
 export const TOOL_CATEGORIES = [
@@ -75,5 +76,13 @@ export const TOOLS = [
     categories: ['network', 'dev', 'converters'],
     icon: Link,
     route: 'UrlEncoder' as const,
+  },
+  {
+    id: 'text-counter',
+    title: 'Text Counter',
+    description: 'Count characters, words, lines, sentences, and paragraphs',
+    categories: ['text'],
+    icon: FileBarChart,
+    route: 'TextCounter' as const,
   },
 ];

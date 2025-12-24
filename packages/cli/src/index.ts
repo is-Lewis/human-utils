@@ -34,3 +34,7 @@ export * from './case-converter/metadata';
 // URL Encoder - re-export everything from the tool
 export * from './url-encoder';
 export * from './url-encoder/metadata';
+
+// Text Counter - re-export everything from the tool
+export * from './text-counter';
+export * from './text-counter/metadata';
